@@ -174,7 +174,7 @@
                         <th class="py-2 text-left">Sensor</th>
                         <th class="py-2 text-left">Batch</th>
                         <th class="py-2 text-left">Berat (g)</th>
-                        <th class="py-2 text-left">IR</th>
+                        {{-- <th class="py-2 text-left">IR</th> --}}
                         <th class="py-2 text-left">Status</th>
                     </tr>
                 </thead>
