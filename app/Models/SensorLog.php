@@ -9,8 +9,10 @@ class SensorLog extends Model
     protected $fillable = [
         'sensor_id',
         'batch',
-        'jumlah_telur',
+        'berat',
+        'ir',
+        'units',
         'status',
-        'waktu',
+        'waktu'
     ];
 }

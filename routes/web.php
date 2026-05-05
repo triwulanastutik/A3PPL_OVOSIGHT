@@ -5,11 +5,12 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProduksiController;
 
-// AUTH
+// ===== AUTH =====
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// GROUP AUTH
+// ===== PROTECTED AREA =====
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -18,13 +19,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/produksi', [ProduksiController::class, 'index'])
         ->name('produksi');
 
-    Route::post('/logout', [LoginController::class, 'logout'])
-        ->name('logout');
-});
-
-// DEFAULT
-Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
+    Route::get('/produksi/export', [ProduksiController::class, 'exportPdf'])
+        ->name('produksi.export');
 });
