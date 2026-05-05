@@ -17,6 +17,13 @@
         <nav class="space-y-2">
             <a href="{{ route('dashboard') }}" class="block hover:bg-slate-800 px-3 py-2 rounded">Dashboard</a>
             <a href="{{ route('produksi') }}" class="block bg-green-600 px-3 py-2 rounded">Produksi</a>
+            <form method="POST" action="{{ route('logout') }}" class="pt-4 border-t border-slate-700 mt-4">
+                @csrf
+                <button type="submit"
+                    class="w-full text-left px-3 py-2 rounded hover:bg-red-700 text-red-400 hover:text-white transition text-sm">
+                    Logout
+                </button>
+            </form>
         </nav>
     </aside>
 
