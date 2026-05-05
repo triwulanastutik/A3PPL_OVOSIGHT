@@ -170,11 +170,12 @@
             <table class="w-full text-sm">
                 <thead class="text-slate-400 border-b border-slate-700">
                     <tr>
-                        <th class="py-2 text-left">Waktu</th>
-                        <th>Sensor</th>
-                        <th>Batch</th>
-                        <th>Jumlah</th>
-                        <th>Status</th>
+                        <th class="py-2 text-left pl-2">Waktu</th>
+                        <th class="py-2 text-left">Sensor</th>
+                        <th class="py-2 text-left">Batch</th>
+                        <th class="py-2 text-left">Berat (g)</th>
+                        <th class="py-2 text-left">IR</th>
+                        <th class="py-2 text-left">Status</th>
                     </tr>
                 </thead>
 

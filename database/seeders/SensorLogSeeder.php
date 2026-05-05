@@ -10,43 +10,52 @@ class SensorLogSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::table('sensor_logs')->truncate();
+
         $data = [];
+        $batchNo = 1;
 
-        // simulasi 30 hari ke belakang
-        for ($day = 30; $day >= 0; $day--) {
+        // Mulai dari 1 Maret 2026, setiap 2 hari ada beberapa batch
+        $startDate = Carbon::create(2026, 3, 1, 8, 0, 0);
 
-            // setiap hari ada beberapa batch
-            for ($i = 0; $i < rand(3, 6); $i++) {
+        for ($dayOffset = 0; $dayOffset <= 65; $dayOffset += 2) {
+            $tanggal = $startDate->copy()->addDays($dayOffset);
 
-                $tanggal = Carbon::now()->subDays($day);
+            // 3-5 batch per sesi (per 2 hari)
+            $batchCount = rand(3, 5);
 
-                // logika realistis
-                $berat = rand(40, 70);
-                $ir = rand(80, 150);
+            for ($i = 0; $i < $batchCount; $i++) {
+                // Waktu per batch selisih beberapa menit
+                $waktu = $tanggal->copy()->addMinutes($i * 15);
 
-                // tentukan status berdasarkan kondisi (bukan random)
-                if ($berat >= 55 && $ir >= 110) {
-                    $status = 'PRODUKTIF';
-                    $units = rand(50, 150);
-                } elseif ($berat >= 50) {
-                    $status = 'PERINGATAN';
-                    $units = rand(20, 60);
-                } else {
+                $berat = rand(40, 72);
+                $ir    = rand(60, 600);
+
+                // Logika status sesuai alur OvoSight
+                if ($berat < 45 || $berat > 70) {
                     $status = 'WASPADA';
-                    $units = rand(5, 25);
+                } elseif ($ir > 500) {
+                    $status = 'PERINGATAN';
+                } else {
+                    $status = 'PRODUKTIF';
                 }
 
+                // Units: 1 per pengecekan batch
+                $units = 1;
+
                 $data[] = [
-                    'sensor_id' => 'SENSOR-' . rand(1, 3),
-                    'batch' => 'BATCH-' . rand(100, 999),
-                    'berat' => $berat,
-                    'ir' => $ir,
-                    'units' => $units,
-                    'status' => $status,
-                    'waktu' => $tanggal,
-                    'created_at' => $tanggal,
-                    'updated_at' => $tanggal,
+                    'sensor_id'  => 'SENSOR-1',
+                    'batch'      => 'BATCH-' . str_pad($batchNo, 3, '0', STR_PAD_LEFT),
+                    'berat'      => $berat,
+                    'ir'         => $ir,
+                    'units'      => $units,
+                    'status'     => $status,
+                    'waktu'      => $waktu,
+                    'created_at' => $waktu,
+                    'updated_at' => $waktu,
                 ];
+
+                $batchNo++;
             }
         }
 
