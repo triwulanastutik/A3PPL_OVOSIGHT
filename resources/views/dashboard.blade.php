@@ -20,6 +20,14 @@
                 class="block px-3 py-2 rounded hover:bg-slate-800">
                 Produksi
             </a>
+
+            <form method="POST" action="{{ route('logout') }}" class="pt-4 border-t border-slate-700 mt-4">
+                @csrf
+                <button type="submit"
+                    class="w-full text-left px-3 py-2 rounded hover:bg-red-700 text-red-400 hover:text-white transition text-sm">
+                    Logout
+                </button>
+            </form>
         </nav>
     </aside>
 
@@ -48,7 +56,7 @@
 
                 <p class="text-sm mt-2 font-semibold
                     {{ ($trendPercent ?? 0) >= 0 ? 'text-green-400' : 'text-red-400' }}">
-                    
+
                     {{ ($trendPercent ?? 0) >= 0 ? '↑' : '↓' }}
                     {{ abs($trendPercent ?? 0) }}% vs kemarin
                 </p>

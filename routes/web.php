@@ -22,3 +22,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/produksi/export', [ProduksiController::class, 'exportPdf'])
         ->name('produksi.export');
 });
+
+// ===== API untuk ESP32 & Polling =====
+Route::post('/api/sensor', [App\Http\Controllers\Api\SensorController::class, 'store']);
+Route::get('/api/latest',  [App\Http\Controllers\Api\SensorController::class, 'latest']);

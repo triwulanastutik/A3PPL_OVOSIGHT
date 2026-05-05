@@ -14,7 +14,6 @@ class DashboardController extends Controller
 
         $query = SensorLog::query();
 
-        // FILTER RANGE
         if ($range === '7d') {
             $query->where('created_at', '>=', Carbon::now()->subDays(7));
         } elseif ($range === '30d') {
@@ -23,26 +22,22 @@ class DashboardController extends Controller
             $query->where('created_at', '>=', Carbon::now()->subYear());
         }
 
-        // DATA TERBARU
-        $latestLogs = (clone $query)
-            ->latest()
-            ->take(10)
-            ->get();
+        $latestLogs = (clone $query)->latest()->take(10)->get();
 
-        // SUMMARY
-        $totalTelur = (clone $query)->sum('units');
+        $totalTelur     = (clone $query)->sum('units');
+        $totalTidakLayak = (clone $query)->where('status', '!=', 'PRODUKTIF')->sum('units');
+        $totalLayak     = $totalTelur - $totalTidakLayak;
+        $persenLayak    = $totalTelur > 0 ? round(($totalLayak / $totalTelur) * 100, 2) : 0;
 
-        $totalTidakLayak = (clone $query)
-            ->where('status', '!=', 'PRODUKTIF')
-            ->sum('units');
+        // TODAY stats untuk card IoT
+        $todayTotal = SensorLog::whereDate('created_at', today())->sum('units');
 
-        $totalLayak = $totalTelur - $totalTidakLayak;
-
-        $persenLayak = $totalTelur > 0
-            ? round(($totalLayak / $totalTelur) * 100, 2)
+        $yesterdayTotal = SensorLog::whereDate('created_at', Carbon::yesterday())->sum('units');
+        $trendPercent = $yesterdayTotal > 0
+            ? round((($todayTotal - $yesterdayTotal) / $yesterdayTotal) * 100, 1)
             : 0;
 
-        // CHART (FIXED + LEBIH ADVANCED)
+        // Chart
         $chart = (clone $query)
             ->selectRaw("
                 DATE(created_at) as label,
@@ -61,7 +56,9 @@ class DashboardController extends Controller
             'totalTidakLayak',
             'persenLayak',
             'chart',
-            'range'
+            'range',
+            'todayTotal',
+            'trendPercent'
         ));
     }
 }
