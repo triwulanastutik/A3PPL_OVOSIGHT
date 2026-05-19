@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\ManajemenKandangController;
+use App\Http\Controllers\JadwalVaksinasiController;
 
 // ===== AUTH =====
 Route::get('/login', [LoginController::class, 'showLoginForm'])
@@ -89,3 +90,24 @@ Route::post('/api/sensor',
 
 Route::get('/api/latest',
     [App\Http\Controllers\Api\SensorController::class, 'latest']);
+
+
+Route::get('/jadwal-vaksinasi',
+    [App\Http\Controllers\JadwalVaksinasiController::class, 'index'])
+    ->name('jadwal.vaksinasi');
+
+Route::post('/jadwal-vaksinasi',
+    [App\Http\Controllers\JadwalVaksinasiController::class, 'store'])
+    ->name('jadwal.vaksinasi.store');
+
+Route::put('/jadwal-vaksinasi/{id}',
+    [App\Http\Controllers\JadwalVaksinasiController::class, 'update'])
+    ->name('jadwal.vaksinasi.update');
+
+Route::post('/jadwal-vaksinasi/{id}/selesai',
+    [App\Http\Controllers\JadwalVaksinasiController::class, 'selesai'])
+    ->name('jadwal.vaksinasi.selesai');
+
+Route::delete('/jadwal-vaksinasi/{id}',
+    [App\Http\Controllers\JadwalVaksinasiController::class, 'destroy'])
+    ->name('jadwal.vaksinasi.destroy');
