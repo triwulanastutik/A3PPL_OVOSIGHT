@@ -21,6 +21,11 @@
                 Produksi
             </a>
 
+            <a href="{{ route('manajemen.kandang') }}"
+                class="block px-3 py-2 rounded hover:bg-slate-800">
+                Manajemen Kandang
+            </a>
+
             <div class="pt-4 mt-4 border-t border-slate-700">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
