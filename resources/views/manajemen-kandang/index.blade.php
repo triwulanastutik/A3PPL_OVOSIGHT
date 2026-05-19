@@ -108,8 +108,8 @@
                                 ✏️
                             </a>
 
-                            <a href="{{ route('manajemen.kandang.show', $batch->id) }}">
-                                👁️
+                            {{-- <a href="{{ route('manajemen.kandang.show', $batch->id) }}">
+                                👁️ --}}
                             </a>
 
                             <form action="{{ route('manajemen.kandang.destroy', $batch->id) }}"

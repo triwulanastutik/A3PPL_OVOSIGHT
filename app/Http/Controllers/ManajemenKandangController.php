@@ -146,9 +146,9 @@ class ManajemenKandangController extends Controller
     */
     private function getStatus($umur)
     {
-        if ($umur < 70) {
+        if ($umur < 80) {
             return 'Produktif';
-        } elseif ($umur < 80) {
+        } elseif ($umur < 100) {
             return 'Mendekati Afkir';
         }
 
