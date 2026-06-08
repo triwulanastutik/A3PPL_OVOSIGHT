@@ -10,52 +10,42 @@ class SensorLogSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('sensor_logs')->truncate();
+        DB::table('sensor_logs')->delete();
 
         $data = [];
-        $batchNo = 1;
+        $nomorTelur = 1;
 
-        // Mulai dari 1 Maret 2026, setiap 2 hari ada beberapa batch
         $startDate = Carbon::create(2026, 3, 1, 8, 0, 0);
 
-        for ($dayOffset = 0; $dayOffset <= 65; $dayOffset += 2) {
+        for ($dayOffset = 0; $dayOffset <= 30; $dayOffset += 2) {
             $tanggal = $startDate->copy()->addDays($dayOffset);
 
-            // 3-5 batch per sesi (per 2 hari)
-            $batchCount = rand(3, 5);
+            $jumlahTelur = rand(10, 30);
 
-            for ($i = 0; $i < $batchCount; $i++) {
-                // Waktu per batch selisih beberapa menit
-                $waktu = $tanggal->copy()->addMinutes($i * 15);
+            for ($i = 0; $i < $jumlahTelur; $i++) {
+                $waktu = $tanggal->copy()->addMinutes($i * 3);
 
                 $berat = rand(40, 72);
-                $ir    = rand(60, 600);
+                $cahaya = rand(60, 600);
 
-                // Logika status sesuai alur OvoSight
-                if ($berat < 45 || $berat > 70) {
-                    $status = 'WASPADA';
-                } elseif ($ir > 500) {
-                    $status = 'PERINGATAN';
+                if ($berat >= 45 && $berat <= 70 && $cahaya <= 500) {
+                    $status = 'layak';
                 } else {
-                    $status = 'PRODUKTIF';
+                    $status = 'tidak';
                 }
 
-                // Units: 1 per pengecekan batch
-                $units = 1;
-
                 $data[] = [
-                    'sensor_id'  => 'SENSOR-1',
-                    'batch'      => 'BATCH-' . str_pad($batchNo, 3, '0', STR_PAD_LEFT),
+                    'id_telur'   => 'TELUR-' . str_pad($nomorTelur, 4, '0', STR_PAD_LEFT),
+                    'tanggal'    => $waktu->toDateString(),
+                    'waktu'      => $waktu->format('H:i:s'),
                     'berat'      => $berat,
-                    'ir'         => $ir,
-                    'units'      => $units,
+                    'cahaya'     => $cahaya,
                     'status'     => $status,
-                    'waktu'      => $waktu,
                     'created_at' => $waktu,
                     'updated_at' => $waktu,
                 ];
 
-                $batchNo++;
+                $nomorTelur++;
             }
         }
 

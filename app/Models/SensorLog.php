@@ -7,12 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class SensorLog extends Model
 {
     protected $fillable = [
-        'sensor_id',
-        'batch',
+        'id_telur',
+        'tanggal',
+        'waktu',
         'berat',
-        'ir',
-        'units',
+        'cahaya',
         'status',
-        'waktu'
+    ];
+
+    protected $casts = [
+        'tanggal' => 'date',
+        'berat' => 'decimal:2',
     ];
 }

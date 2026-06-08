@@ -6,27 +6,33 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('schedule', function (Blueprint $table) {
             $table->id();
+
+            // Nama vaksin
             $table->string('nama_vaksin');
-            $table->string('batch_kandang');
-            $table->date('tanggal_target');
-            $table->string('metode_pemberian')->default('Air Minum');
-            $table->enum('status', ['TERJADWAL', 'SELESAI', 'TERLEWAT'])->default('TERJADWAL');
-            $table->date('tanggal_selesai')->nullable();
+
+            // Input text, bukan dropdown
+            $table->string('kandang');
+
+            // Tanggal jadwal vaksinasi
+            $table->date('tanggal');
+
+            // Metode pemberian vaksin
+            $table->string('metode_pemberian')->nullable();
+
+            // Status vaksinasi
+            $table->enum('status', ['belum', 'sudah'])->default('belum');
+
+            // Catatan tambahan
             $table->text('catatan')->nullable();
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('schedule');

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProduksiController;
-use App\Http\Controllers\ManajemenKandangController;
+use App\Http\Controllers\DataAyamController;
 use App\Http\Controllers\JadwalVaksinasiController;
 
 // ===== AUTH =====
@@ -43,44 +43,44 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | MANAJEMEN KANDANG
+    |  DATA AYAM
     |--------------------------------------------------------------------------
     */
 
     // lihat semua batch
-    Route::get('/manajemen-kandang',
-        [ManajemenKandangController::class, 'index'])
-        ->name('manajemen.kandang');
+    Route::get('/data-ayam',
+        [DataAyamController::class, 'index'])
+        ->name('data.ayam');
 
     // form tambah
-    Route::get('/manajemen-kandang/create',
-        [ManajemenKandangController::class, 'create'])
-        ->name('manajemen.kandang.create');
+    Route::get('/data-ayam/create',
+        [DataAyamController::class, 'create'])
+        ->name('data.ayam.create');
 
     // simpan batch baru
-    Route::post('/manajemen-kandang/store',
-        [ManajemenKandangController::class, 'store'])
-        ->name('manajemen.kandang.store');
+    Route::post('/data-ayam/store',
+        [DataAyamController::class, 'store'])
+        ->name('data.ayam.store');
 
     // detail batch
-    Route::get('/manajemen-kandang/{id}',
-        [ManajemenKandangController::class, 'show'])
-        ->name('manajemen.kandang.show');
+    Route::get('/data-ayam/{id}',
+        [DataAyamController::class, 'show'])
+        ->name('data.ayam.show');
 
     // form edit
-    Route::get('/manajemen-kandang/{id}/edit',
-        [ManajemenKandangController::class, 'edit'])
-        ->name('manajemen.kandang.edit');
+    Route::get('/data-ayam/{id}/edit',
+        [DataAyamController::class, 'edit'])
+        ->name('data.ayam.edit');
 
     // update batch
-    Route::put('/manajemen-kandang/{id}',
-        [ManajemenKandangController::class, 'update'])
-        ->name('manajemen.kandang.update');
+    Route::put('/data-ayam/{id}',
+        [DataAyamController::class, 'update'])
+        ->name('data.ayam.update');
 
     // hapus batch
-    Route::delete('/manajemen-kandang/{id}',
-        [ManajemenKandangController::class, 'destroy'])
-        ->name('manajemen.kandang.destroy');
+    Route::delete('/data-ayam/{id}',
+        [DataAyamController::class, 'destroy'])
+        ->name('data.ayam.destroy');
 });
 
 
@@ -92,22 +92,24 @@ Route::get('/api/latest',
     [App\Http\Controllers\Api\SensorController::class, 'latest']);
 
 
-Route::get('/jadwal-vaksinasi',
-    [App\Http\Controllers\JadwalVaksinasiController::class, 'index'])
+// ===== Jadwal Vaksinasi =====
+Route::get('/jadwal-vaksinasi', [JadwalVaksinasiController::class, 'index'])
     ->name('jadwal.vaksinasi');
 
-Route::post('/jadwal-vaksinasi',
-    [App\Http\Controllers\JadwalVaksinasiController::class, 'store'])
+Route::get('/jadwal-vaksinasi/create', [JadwalVaksinasiController::class, 'create'])
+    ->name('jadwal.vaksinasi.create');
+
+Route::post('/jadwal-vaksinasi', [JadwalVaksinasiController::class, 'store'])
     ->name('jadwal.vaksinasi.store');
 
-Route::put('/jadwal-vaksinasi/{id}',
-    [App\Http\Controllers\JadwalVaksinasiController::class, 'update'])
+Route::get('/jadwal-vaksinasi/{id}/edit', [JadwalVaksinasiController::class, 'edit'])
+    ->name('jadwal.vaksinasi.edit');
+
+Route::put('/jadwal-vaksinasi/{id}', [JadwalVaksinasiController::class, 'update'])
     ->name('jadwal.vaksinasi.update');
 
-Route::post('/jadwal-vaksinasi/{id}/selesai',
-    [App\Http\Controllers\JadwalVaksinasiController::class, 'selesai'])
+Route::put('/jadwal-vaksinasi/{id}/selesai', [JadwalVaksinasiController::class, 'selesai'])
     ->name('jadwal.vaksinasi.selesai');
 
-Route::delete('/jadwal-vaksinasi/{id}',
-    [App\Http\Controllers\JadwalVaksinasiController::class, 'destroy'])
+Route::delete('/jadwal-vaksinasi/{id}', [JadwalVaksinasiController::class, 'destroy'])
     ->name('jadwal.vaksinasi.destroy');

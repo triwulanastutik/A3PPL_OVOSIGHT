@@ -8,164 +8,187 @@ use Carbon\Carbon;
 
 class JadwalVaksinasiController extends Controller
 {
-    /**
-     * Show calendar + form + sidebar list
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | HALAMAN INDEX JADWAL VAKSINASI
+    |--------------------------------------------------------------------------
+    */
     public function index(Request $request)
     {
-        // Auto-update TERLEWAT status for past-due schedules
-        Schedule::where('status', 'TERJADWAL')
-            ->where('tanggal_target', '<', Carbon::today())
-            ->update(['status' => 'TERLEWAT']);
-
-        // Month navigation
-        $bulan = $request->input('bulan', Carbon::now()->month);
-        $tahun = $request->input('tahun', Carbon::now()->year);
+        $bulan = (int) $request->input('bulan', Carbon::now()->month);
+        $tahun = (int) $request->input('tahun', Carbon::now()->year);
 
         $currentMonth = Carbon::createFromDate($tahun, $bulan, 1);
 
-        // All schedules for this month (for calendar dots)
-        $jadwalBulanIni = Schedule::whereYear('tanggal_target', $tahun)
-            ->whereMonth('tanggal_target', $bulan)
+        /*
+        |--------------------------------------------------------------------------
+        | DATA UNTUK KALENDER
+        |--------------------------------------------------------------------------
+        */
+        $jadwalBulanIni = Schedule::whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $bulan)
+            ->orderBy('tanggal', 'asc')
             ->get()
-            ->groupBy(fn($j) => $j->tanggal_target->format('Y-m-d'));
+            ->groupBy(function ($jadwal) {
+                return Carbon::parse($jadwal->tanggal)->format('Y-m-d');
+            });
 
-        // Sidebar: non-completed schedules, ordered by date
-        $jadwalMendatang = Schedule::where('status', '!=', 'SELESAI')
-            ->orderBy('tanggal_target', 'asc')
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS TAMPILAN
+        |--------------------------------------------------------------------------
+        | Database hanya menyimpan:
+        | - belum
+        | - sudah
+        |
+        | Terlewat dihitung otomatis:
+        | status = belum dan tanggal < hari ini
+        */
+        $jadwalMendatang = Schedule::where('status', 'belum')
+            ->whereDate('tanggal', '>=', Carbon::today())
+            ->orderBy('tanggal', 'asc')
             ->get();
 
-        // Completed schedules for sidebar
-        $jadwalSelesai = Schedule::where('status', 'SELESAI')
-            ->orderBy('tanggal_selesai', 'desc')
+        $jadwalTerlewat = Schedule::where('status', 'belum')
+            ->whereDate('tanggal', '<', Carbon::today())
+            ->orderBy('tanggal', 'asc')
+            ->get();
+
+        $jadwalSelesai = Schedule::where('status', 'sudah')
+            ->orderBy('tanggal', 'desc')
             ->take(5)
             ->get();
-
-        // Edit mode: load specific schedule if edit_id passed
-        $editJadwal = null;
-        if ($request->has('edit_id')) {
-            $editJadwal = Schedule::find($request->edit_id);
-        }
-
-        // Available batches (from batches table if exists, else dummy)
-        $batches = $this->getBatches();
 
         return view('jadwal-vaksinasi.index', compact(
             'currentMonth',
             'jadwalBulanIni',
             'jadwalMendatang',
+            'jadwalTerlewat',
             'jadwalSelesai',
-            'editJadwal',
-            'batches',
             'bulan',
             'tahun'
         ));
     }
 
-    /**
-     * Store new schedule
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | FORM TAMBAH JADWAL
+    |--------------------------------------------------------------------------
+    */
+    public function create(Request $request)
+    {
+        $tanggal = $request->tanggal;
+
+        return view('jadwal-vaksinasi.create', compact('tanggal'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SIMPAN JADWAL BARU
+    |--------------------------------------------------------------------------
+    */
     public function store(Request $request)
     {
         $request->validate([
             'nama_vaksin'      => 'required|string|max:100',
-            'batch_kandang'    => 'required|string|max:50',
-            'tanggal_target'   => 'required|date',
-            'metode_pemberian' => 'required|string|max:50',
+            'kandang'          => 'required|string|max:100',
+            'tanggal'          => 'required|date',
+            'metode_pemberian' => 'nullable|string|max:50',
+            'catatan'          => 'nullable|string',
         ]);
 
-        $tanggal = Carbon::parse($request->tanggal_target);
-        $status  = $tanggal->isPast() && !$tanggal->isToday() ? 'TERLEWAT' : 'TERJADWAL';
+        $tanggal = Carbon::parse($request->tanggal);
 
         Schedule::create([
             'nama_vaksin'      => $request->nama_vaksin,
-            'batch_kandang'    => $request->batch_kandang,
-            'tanggal_target'   => $request->tanggal_target,
+            'kandang'          => $request->kandang,
+            'tanggal'          => $tanggal->toDateString(),
             'metode_pemberian' => $request->metode_pemberian,
-            'status'           => $status,
+            'status'           => 'belum',
             'catatan'          => $request->catatan,
         ]);
 
         return redirect()
-            ->route('jadwal.vaksinasi', ['bulan' => $tanggal->month, 'tahun' => $tanggal->year])
+            ->route('jadwal.vaksinasi', [
+                'bulan' => $tanggal->month,
+                'tahun' => $tanggal->year,
+            ])
             ->with('success', 'Jadwal vaksinasi berhasil disimpan!');
     }
 
-    /**
-     * Update existing schedule
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | FORM EDIT JADWAL
+    |--------------------------------------------------------------------------
+    */
+    public function edit($id)
+    {
+        $jadwal = Schedule::findOrFail($id);
+
+        return view('jadwal-vaksinasi.edit', compact('jadwal'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE JADWAL
+    |--------------------------------------------------------------------------
+    */
     public function update(Request $request, $id)
     {
         $request->validate([
             'nama_vaksin'      => 'required|string|max:100',
-            'batch_kandang'    => 'required|string|max:50',
-            'tanggal_target'   => 'required|date',
-            'metode_pemberian' => 'required|string|max:50',
+            'kandang'          => 'required|string|max:100',
+            'tanggal'          => 'required|date',
+            'metode_pemberian' => 'nullable|string|max:50',
+            'status'           => 'required|in:belum,sudah',
+            'catatan'          => 'nullable|string',
         ]);
 
-        $jadwal  = Schedule::findOrFail($id);
-        $tanggal = Carbon::parse($request->tanggal_target);
-
-        // Only update status if not already SELESAI
-        $status = $jadwal->status === 'SELESAI'
-            ? 'SELESAI'
-            : ($tanggal->isPast() && !$tanggal->isToday() ? 'TERLEWAT' : 'TERJADWAL');
+        $jadwal = Schedule::findOrFail($id);
+        $tanggal = Carbon::parse($request->tanggal);
 
         $jadwal->update([
             'nama_vaksin'      => $request->nama_vaksin,
-            'batch_kandang'    => $request->batch_kandang,
-            'tanggal_target'   => $request->tanggal_target,
+            'kandang'          => $request->kandang,
+            'tanggal'          => $tanggal->toDateString(),
             'metode_pemberian' => $request->metode_pemberian,
-            'status'           => $status,
+            'status'           => $request->status,
             'catatan'          => $request->catatan,
         ]);
 
         return redirect()
-            ->route('jadwal.vaksinasi', ['bulan' => $tanggal->month, 'tahun' => $tanggal->year])
+            ->route('jadwal.vaksinasi', [
+                'bulan' => $tanggal->month,
+                'tahun' => $tanggal->year,
+            ])
             ->with('success', 'Jadwal vaksinasi berhasil diperbarui!');
     }
 
-    /**
-     * Mark as completed
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | TANDAI SELESAI
+    |--------------------------------------------------------------------------
+    */
     public function selesai($id)
     {
         $jadwal = Schedule::findOrFail($id);
+
         $jadwal->update([
-            'status'          => 'SELESAI',
-            'tanggal_selesai' => Carbon::today(),
+            'status' => 'sudah',
         ]);
 
         return back()->with('success', 'Jadwal ditandai sudah selesai!');
     }
 
-    /**
-     * Delete schedule
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | HAPUS JADWAL
+    |--------------------------------------------------------------------------
+    */
     public function destroy($id)
     {
         Schedule::findOrFail($id)->delete();
-        return back()->with('success', 'Jadwal berhasil dihapus.');
-    }
 
-    /**
-     * Helper: get available batches
-     */
-    private function getBatches(): array
-    {
-        try {
-            return \App\Models\Batch::all()
-                ->map(fn($b) => $b->kode_batch . ' (' . $b->kandang . ')')
-                ->toArray();
-        } catch (\Exception $e) {
-            return [
-                'Batch 22-A (Kandang 1)',
-                'Batch 22-B (Kandang 2)',
-                'Batch 22-C (Kandang 3)',
-                'Batch 22-D (Kandang 4)',
-                'Batch 23-A (Brooder)',
-                'Batch 23-B (Brooder)',
-            ];
-        }
+        return back()->with('success', 'Jadwal berhasil dihapus.');
     }
 }

@@ -2,61 +2,48 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Schedule;
 use Carbon\Carbon;
 
 class ScheduleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        Schedule::query()->delete();
+
         $jadwals = [
             [
-                'nama_vaksin'      => 'IBD Gumboro',
-                'batch_kandang'    => 'Batch 22-A (Kandang 1)',
-                'tanggal_target'   => Carbon::create(2023, 10, 8),
+                'nama_vaksin' => 'IBD Gumboro',
+                'kandang' => 'KDG-001',
+                'tanggal' => Carbon::now()->addDays(3)->toDateString(),
                 'metode_pemberian' => 'Air Minum',
-                'status'           => 'TERLEWAT',
+                'status' => 'belum',
+                'catatan' => 'Vaksinasi awal untuk pencegahan Gumboro.',
             ],
             [
-                'nama_vaksin'      => 'ND-IB Boost',
-                'batch_kandang'    => 'Batch 22-C (Kandang 3)',
-                'tanggal_target'   => Carbon::create(2023, 10, 12),
+                'nama_vaksin' => 'ND-IB Boost',
+                'kandang' => 'KDG-002',
+                'tanggal' => Carbon::now()->addDays(7)->toDateString(),
                 'metode_pemberian' => 'Air Minum',
-                'status'           => 'TERJADWAL',
+                'status' => 'belum',
+                'catatan' => 'Booster ND-IB.',
             ],
             [
-                'nama_vaksin'      => 'Fowl Pox',
-                'batch_kandang'    => 'Batch 21-D (Kandang 2)',
-                'tanggal_target'   => Carbon::create(2023, 10, 5),
+                'nama_vaksin' => 'Fowl Pox',
+                'kandang' => 'KDG-003',
+                'tanggal' => Carbon::now()->subDays(5)->toDateString(),
                 'metode_pemberian' => 'Suntik',
-                'status'           => 'SELESAI',
-                'tanggal_selesai'  => Carbon::create(2023, 10, 5),
+                'status' => 'sudah',
+                'catatan' => 'Sudah dilakukan oleh petugas kandang.',
             ],
             [
-                'nama_vaksin'      => 'AI (Flu Burung)',
-                'batch_kandang'    => 'Batch 23-B (Brooder)',
-                'tanggal_target'   => Carbon::create(2023, 10, 15),
+                'nama_vaksin' => 'AI Flu Burung',
+                'kandang' => 'KDG-001',
+                'tanggal' => Carbon::now()->addDays(14)->toDateString(),
                 'metode_pemberian' => 'Suntik',
-                'status'           => 'TERJADWAL',
-            ],
-            [
-                'nama_vaksin'      => 'ND La Sota',
-                'batch_kandang'    => 'Batch 22-A (Kandang 1)',
-                'tanggal_target'   => Carbon::now()->addDays(5),
-                'metode_pemberian' => 'Tetes Mata',
-                'status'           => 'TERJADWAL',
-            ],
-            [
-                'nama_vaksin'      => 'Marek',
-                'batch_kandang'    => 'Batch 23-A (Brooder)',
-                'tanggal_target'   => Carbon::now()->addDays(10),
-                'metode_pemberian' => 'Suntik',
-                'status'           => 'TERJADWAL',
+                'status' => 'belum',
+                'catatan' => 'Jadwal vaksin flu burung.',
             ],
         ];
 

@@ -9,21 +9,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('batches', function (Blueprint $table) {
-
             $table->id();
 
-            $table->string('kode_batch')->unique();
+            // Menggantikan kode_batch / id batch
+            $table->string('id_kandang')->unique();
 
-            $table->string('kandang');
+            // Jenis ayam untuk konteks peternakan ayam petelur
+            $table->enum('jenis_ayam', ['kampung', 'ras_petelur']);
 
-            $table->string('jenis_ayam');
-
+            // Dipakai untuk menghitung umur ayam otomatis setiap minggu
             $table->date('tanggal_masuk');
 
-            $table->integer('umur_minggu');
+            // Jumlah ayam dalam kandang
+            $table->integer('populasi')->nullable();
 
-            $table->integer('populasi');
-
+            // Status produksi ayam
             $table->enum('status_produksi', [
                 'Produktif',
                 'Mendekati Afkir',

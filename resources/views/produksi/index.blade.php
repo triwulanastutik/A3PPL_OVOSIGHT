@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Produksi Telur</title>
+    <title>Produksi Telur - OvoSight</title>
     @vite('resources/css/app.css')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -37,69 +37,38 @@
             </p>
         </div>
 
-        {{-- Nav --}}
+        {{-- Navigation --}}
         <nav class="flex-1 px-3 py-4 space-y-0.5">
 
-            {{-- DASHBOARD ACTIVE --}}
             <a href="{{ route('dashboard') }}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
-
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
                 Dashboard
             </a>
 
             <a href="{{ route('produksi') }}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm bg-green-600 text-white font-medium transition-all">
-
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm bg-green-600 text-white font-medium transition-all">
                 Produksi
             </a>
 
-            <a href="{{ route('manajemen.kandang') }}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
-
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-
-                Manajemen Kandang
+            <a href="{{ route('data.ayam') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+                Data Ayam
             </a>
 
             <a href="{{ route('jadwal.vaksinasi') }}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
-
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
                 Jadwal Vaksinasi
             </a>
 
         </nav>
 
-        {{-- Bottom --}}
+        {{-- Logout --}}
         <div class="px-3 py-4 border-t border-slate-800">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
 
                 <button type="submit"
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-all">
-
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-all">
                     Keluar
                 </button>
             </form>
@@ -107,194 +76,367 @@
 
     </aside>
 
-    <!-- MAIN -->
+    {{-- ===== MAIN CONTENT ===== --}}
     <main class="flex-1 flex flex-col">
 
         {{-- TOPBAR --}}
         <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between shrink-0">
 
-            <div class="flex items-center gap-3">
+            <div>
                 <span class="font-semibold text-white">
                     Lubada Farm
                 </span>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-white leading-none">
+                        {{ auth()->user()->name ?? 'Admin OvoSight' }}
+                    </p>
 
-                <div class="relative">
-
-                    <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24">
-
-                        <path stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-
-                    <input type="text"
-                        placeholder="Cari data..."
-                        class="pl-9 pr-4 py-1.5 text-sm bg-slate-800 text-white rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 w-48 placeholder:text-slate-400"/>
+                    <p class="text-xs text-slate-400">
+                        OWNER
+                    </p>
                 </div>
 
-                <div class="flex items-center gap-2">
-
-                    <div class="text-right">
-                        <p class="text-sm font-semibold text-white leading-none">
-                            Fauzan Lubada
-                        </p>
-
-                        <p class="text-xs text-slate-400">
-                            OWNER
-                        </p>
-                    </div>
-
-                    <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                        F
-                    </div>
+                <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
                 </div>
-
             </div>
+
         </header>
 
         <div class="p-5">
 
-        <!-- HEADER -->
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Produksi Telur</h1>
+            {{-- HEADER --}}
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">
+                        Produksi Telur
+                    </h1>
 
-            <a href="{{ route('produksi.export', ['start'=>$start,'end'=>$end]) }}"
-               class="bg-green-600 px-4 py-2 rounded">
-                Export PDF
-            </a>
+                    <p class="text-slate-400">
+                        Rekap produksi telur, klasifikasi, dan record hasil sensor
+                    </p>
+                </div>
+
+                @php
+                    $exportUrl = \Illuminate\Support\Facades\Route::has('produksi.export')
+                        ? route('produksi.export', ['start' => $start, 'end' => $end])
+                        : url('/produksi/export') . '?' . http_build_query(['start' => $start, 'end' => $end]);
+                @endphp
+
+                <a href="{{ $exportUrl }}"
+                   class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    Export PDF
+                </a>
+            </div>
+
+            {{-- FILTER TANGGAL --}}
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-8">
+                <form method="GET" action="{{ route('produksi') }}"
+                      class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">
+                            Tanggal Mulai
+                        </label>
+
+                        <input type="date"
+                               name="start"
+                               value="{{ $start }}"
+                               class="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">
+                            Tanggal Akhir
+                        </label>
+
+                        <input type="date"
+                               name="end"
+                               value="{{ $end }}"
+                               class="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <button type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                        Filter
+                    </button>
+
+                    <a href="{{ route('produksi') }}"
+                       class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold text-center transition">
+                        Reset
+                    </a>
+
+                </form>
+            </div>
+
+            {{-- SUMMARY PRODUKSI --}}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-green-500">
+                    <p class="text-sm text-slate-400">
+                        Total Produksi
+                    </p>
+
+                    <h2 class="text-3xl text-green-400 font-bold mt-2">
+                        {{ number_format($total ?? 0) }}
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-2">
+                        Total telur terdeteksi
+                    </p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-blue-500">
+                    <p class="text-sm text-slate-400">
+                        Telur Layak
+                    </p>
+
+                    <h2 class="text-3xl text-blue-400 font-bold mt-2">
+                        {{ number_format($layak ?? 0) }}
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-2">
+                        {{ $persentaseLayak ?? 0 }}% dari total produksi
+                    </p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-red-500">
+                    <p class="text-sm text-slate-400">
+                        Telur Tidak Layak
+                    </p>
+
+                    <h2 class="text-3xl text-red-400 font-bold mt-2">
+                        {{ number_format($tidak ?? 0) }}
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-2">
+                        {{ $persentaseTidak ?? 0 }}% dari total produksi
+                    </p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-yellow-500">
+                    <p class="text-sm text-slate-400">
+                        Rata-rata Produksi
+                    </p>
+
+                    <h2 class="text-3xl text-yellow-400 font-bold mt-2">
+                        {{ number_format($rata ?? 0) }}
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-2">
+                        Telur per hari
+                    </p>
+                </div>
+
+            </div>
+
+            {{-- GRAFIK PRODUKSI LINE CHART --}}
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="font-bold">
+                            Grafik Produksi Telur
+                        </h2>
+
+                        <p class="text-xs text-slate-400">
+                            Sumbu X = tanggal produksi, sumbu Y = jumlah telur
+                        </p>
+                    </div>
+                </div>
+
+                <div class="h-96">
+                    <canvas id="produksiChart"></canvas>
+                </div>
+            </div>
+
+            {{-- TABEL RECORD PRODUKSI --}}
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+
+                <div class="px-5 py-4 border-b border-slate-700">
+                    <h2 class="font-bold">
+                        Record Produksi Telur
+                    </h2>
+
+                    <p class="text-xs text-slate-400 mt-1">
+                        Data detail hasil deteksi sensor telur
+                    </p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+
+                        <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-3">ID Telur</th>
+                                <th class="px-4 py-3">Tanggal</th>
+                                <th class="px-4 py-3">Waktu</th>
+                                <th class="px-4 py-3">Berat</th>
+                                <th class="px-4 py-3">Cahaya</th>
+                                <th class="px-4 py-3">Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse ($data as $log)
+                                <tr class="border-t border-slate-700 hover:bg-slate-700/40 transition">
+
+                                    <td class="px-4 py-3 font-semibold text-white">
+                                        {{ $log->id_telur }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-slate-300">
+                                        {{ \Carbon\Carbon::parse($log->tanggal)->format('d M Y') }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-slate-300">
+                                        {{ $log->waktu }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-yellow-400 font-semibold">
+                                        {{ $log->berat }} gram
+                                    </td>
+
+                                    <td class="px-4 py-3 text-blue-400 font-semibold">
+                                        {{ $log->cahaya }}
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        @if ($log->status === 'layak')
+                                            <span class="px-3 py-1 rounded-full bg-green-600 text-white text-xs font-semibold">
+                                                Layak
+                                            </span>
+                                        @else
+                                            <span class="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-semibold">
+                                                Tidak Layak
+                                            </span>
+                                        @endif
+                                    </td>
+
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-4 py-8 text-center text-slate-400">
+                                        Belum ada data produksi telur.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="px-5 py-4 border-t border-slate-700">
+                    {{ $data->links() }}
+                </div>
+
+            </div>
+
         </div>
-
-        <!-- FILTER TANGGAL -->
-        <form method="GET" action="{{ route('produksi') }}"
-              class="bg-slate-800 p-4 rounded-xl flex items-end gap-4 mb-6">
-
-            <div>
-                <label class="text-xs text-slate-400">Dari</label>
-                <input type="date" name="start"
-                       value="{{ $start }}"
-                       class="bg-slate-900 px-3 py-2 rounded text-white">
-            </div>
-
-            <div>
-                <label class="text-xs text-slate-400">Hingga</label>
-                <input type="date" name="end"
-                       value="{{ $end }}"
-                       class="bg-slate-900 px-3 py-2 rounded text-white">
-            </div>
-
-            <button class="bg-green-600 px-4 py-2 rounded">
-                Terapkan
-            </button>
-
-        </form>
-
-        <!-- SUMMARY -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
-
-            <div class="bg-slate-800 p-4 rounded">
-                <p class="text-sm text-slate-400">Total Produksi</p>
-                <h2 class="text-xl font-bold text-green-400">{{ number_format($total) }}</h2>
-            </div>
-
-            <div class="bg-slate-800 p-4 rounded">
-                <p class="text-sm text-slate-400">Layak</p>
-                <h2 class="text-xl text-green-400 font-bold">{{ number_format($layak) }}</h2>
-            </div>
-
-            <div class="bg-slate-800 p-4 rounded">
-                <p class="text-sm text-slate-400">Tidak Layak</p>
-                <h2 class="text-xl text-red-400 font-bold">{{ number_format($tidak) }}</h2>
-            </div>
-
-            <div class="bg-slate-800 p-4 rounded">
-                <p class="text-sm text-slate-400">Rata / Hari</p>
-                <h2 class="text-xl text-blue-400 font-bold">{{ number_format($rata) }}</h2>
-            </div>
-
-        </div>
-
-        <!-- CHART -->
-        <div class="bg-slate-800 p-6 rounded mb-6">
-            <canvas id="chart"></canvas>
-        </div>
-
-        <!-- TABLE -->
-        <div class="bg-slate-800 p-6 rounded">
-            <table class="w-full text-sm">
-                <thead class="text-slate-400 border-b border-slate-700">
-                    <tr>
-                        <th class="py-2 text-left">Waktu</th>
-                        <th>Sensor</th>
-                        <th>Batch</th>
-                        <th>Jumlah</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @forelse($data as $row)
-                    <tr class="border-b border-slate-700">
-                        <td class="py-2">{{ $row->created_at }}</td>
-                        <td>{{ $row->sensor_id }}</td>
-                        <td>{{ $row->batch }}</td>
-                        <td>{{ $row->units }}</td>
-                        <td>
-                            <span class="px-2 py-1 text-xs rounded
-                                {{ $row->status == 'PRODUKTIF' ? 'bg-green-600' : '' }}
-                                {{ $row->status == 'PERINGATAN' ? 'bg-yellow-500' : '' }}
-                                {{ $row->status == 'WASPADA' ? 'bg-red-600' : '' }}">
-                                {{ $row->status }}
-                            </span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="text-center py-4">
-                            Tidak ada data
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-
-            <div class="mt-4">
-                {{ $data->appends(['start'=>$start,'end'=>$end])->links() }}
-            </div>
-
-        </div>
-    </div>
     </main>
 </div>
 
+{{-- SCRIPT LINE CHART PRODUKSI --}}
 <script>
-const labels = @json($chart->pluck('label'));
-const data = @json($chart->pluck('total'));
+const chartData = @json($chart ?? []);
 
-new Chart(document.getElementById('chart'), {
+const labels = chartData.map(item => item.label);
+const totalData = chartData.map(item => item.total);
+const layakData = chartData.map(item => item.layak);
+const tidakData = chartData.map(item => item.tidak);
+
+new Chart(document.getElementById('produksiChart'), {
     type: 'line',
     data: {
         labels: labels,
-        datasets: [{
-            label: 'Produksi',
-            data: data,
-            borderColor: '#22c55e',
-            tension: 0.4
-        }]
+        datasets: [
+            {
+                label: 'Total Telur',
+                data: totalData,
+                borderColor: '#22c55e',
+                backgroundColor: '#22c55e',
+                tension: 0.35,
+                fill: false,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            },
+            {
+                label: 'Layak',
+                data: layakData,
+                borderColor: '#3b82f6',
+                backgroundColor: '#3b82f6',
+                tension: 0.35,
+                fill: false,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            },
+            {
+                label: 'Tidak Layak',
+                data: tidakData,
+                borderColor: '#ef4444',
+                backgroundColor: '#ef4444',
+                tension: 0.35,
+                fill: false,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }
+        ]
     },
     options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
         plugins: {
-            legend: { labels: { color: 'white' } }
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: 'white',
+                    usePointStyle: true,
+                    padding: 20
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': ' + context.raw + ' telur';
+                    }
+                }
+            }
         },
         scales: {
-            x: { ticks: { color: 'white' }},
-            y: { ticks: { color: 'white' }}
+            x: {
+                ticks: {
+                    color: 'white'
+                },
+                grid: {
+                    color: 'rgba(148, 163, 184, 0.15)'
+                },
+                title: {
+                    display: true,
+                    text: 'Tanggal Produksi',
+                    color: 'white'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: 'white',
+                    precision: 0
+                },
+                grid: {
+                    color: 'rgba(148, 163, 184, 0.15)'
+                },
+                title: {
+                    display: true,
+                    text: 'Jumlah Telur',
+                    color: 'white'
+                }
+            }
         }
     }
 });

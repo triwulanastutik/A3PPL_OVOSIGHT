@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Batch extends Model
 {
@@ -12,12 +13,23 @@ class Batch extends Model
     protected $table = 'batches';
 
     protected $fillable = [
-        'kode_batch',
-        'kandang',
+        'id_kandang',
         'jenis_ayam',
         'tanggal_masuk',
-        'umur_minggu',
         'populasi',
-        'status_produksi'
+        'status_produksi',
     ];
+
+    protected $casts = [
+        'tanggal_masuk' => 'date',
+    ];
+
+    public function getUmurMingguAttribute(): int
+    {
+        if (!$this->tanggal_masuk) {
+            return 0;
+        }
+
+        return Carbon::parse($this->tanggal_masuk)->diffInWeeks(Carbon::today());
+    }
 }

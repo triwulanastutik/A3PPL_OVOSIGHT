@@ -11,76 +11,180 @@ class ProduksiController extends Controller
 {
     public function index(Request $request)
     {
-        // ===== DEFAULT RANGE =====
-        $start = $request->start ?? now()->subDays(7)->format('Y-m-d');
-        $end   = $request->end ?? now()->format('Y-m-d');
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER TANGGAL
+        |--------------------------------------------------------------------------
+        | Jika start dan end kosong, tampilkan semua data produksi.
+        | Jika start dan end diisi, tampilkan data sesuai rentang tanggal.
+        */
+        $start = $request->start;
+        $end   = $request->end;
 
-        $from = Carbon::parse($start)->startOfDay();
-        $to   = Carbon::parse($end)->endOfDay();
+        $query = SensorLog::query();
 
-        // ===== QUERY =====
-        $logs = SensorLog::whereBetween('created_at', [$from, $to])->get();
+        if ($start && $end) {
+            $from = Carbon::parse($start)->toDateString();
+            $to   = Carbon::parse($end)->toDateString();
 
-        // ===== SUMMARY =====
-        $total = $logs->sum('units');
-        $layak = $logs->where('status','PRODUKTIF')->sum('units');
-        $tidak = $logs->whereIn('status',['PERINGATAN','WASPADA'])->sum('units');
-
-        $days = max($from->diffInDays($to), 1);
-        $rata = round($total / $days);
-
-        // ===== MODE DETEKSI =====
-        $isYear = $days > 60;
-
-        if ($isYear) {
-            // BULANAN
-            $chart = $logs->groupBy(fn($item) =>
-                Carbon::parse($item->created_at)->format('Y-m')
-            )->map(function ($group) {
-                return [
-                    'label' => Carbon::parse($group->first()->created_at)->format('M'),
-                    'total' => $group->sum('units'),
-                ];
-            })->values();
-        } else {
-            // HARIAN
-            $chart = $logs->groupBy(fn($item) =>
-                Carbon::parse($item->created_at)->format('Y-m-d')
-            )->map(function ($group) {
-                return [
-                    'label' => Carbon::parse($group->first()->created_at)->format('d M'),
-                    'total' => $group->sum('units'),
-                ];
-            })->values();
+            $query->whereBetween('tanggal', [$from, $to]);
         }
 
-        // ===== TABLE =====
-        $data = SensorLog::whereBetween('created_at', [$from, $to])
-            ->latest()
-            ->paginate(10);
+        /*
+        |--------------------------------------------------------------------------
+        | DATA PRODUKSI UNTUK SUMMARY DAN GRAFIK
+        |--------------------------------------------------------------------------
+        */
+        $logs = (clone $query)
+            ->orderBy('tanggal', 'asc')
+            ->orderBy('waktu', 'asc')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUMMARY PRODUKSI
+        |--------------------------------------------------------------------------
+        | 1 baris sensor_logs = 1 telur.
+        */
+        $total = $logs->count();
+        $layak = $logs->where('status', 'layak')->count();
+        $tidak = $logs->where('status', 'tidak')->count();
+
+        $persentaseLayak = $total > 0
+            ? round(($layak / $total) * 100, 2)
+            : 0;
+
+        $persentaseTidak = $total > 0
+            ? round(($tidak / $total) * 100, 2)
+            : 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | RATA-RATA PRODUKSI PER HARI
+        |--------------------------------------------------------------------------
+        */
+        if ($logs->count() > 0) {
+            $tanggalAwal = Carbon::parse($logs->min('tanggal'));
+            $tanggalAkhir = Carbon::parse($logs->max('tanggal'));
+            $jumlahHari = max($tanggalAwal->diffInDays($tanggalAkhir) + 1, 1);
+        } else {
+            $jumlahHari = 1;
+        }
+
+        $rata = round($total / $jumlahHari);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRAFIK PRODUKSI PER HARI
+        |--------------------------------------------------------------------------
+        | Sumbu X = tanggal produksi.
+        | Sumbu Y = jumlah telur/butir.
+        | Dataset = total telur, layak, tidak layak.
+        */
+        $chart = $logs->groupBy(function ($item) {
+                return Carbon::parse($item->tanggal)->format('Y-m-d');
+            })
+            ->map(function ($group) {
+                $tanggal = Carbon::parse($group->first()->tanggal);
+
+                return [
+                    'label'   => $tanggal->format('d M'),
+                    'tanggal' => $tanggal->toDateString(),
+                    'total'   => $group->count(),
+                    'layak'   => $group->where('status', 'layak')->count(),
+                    'tidak'   => $group->where('status', 'tidak')->count(),
+                ];
+            })
+            ->values();
+
+        /*
+        |--------------------------------------------------------------------------
+        | TABEL RECORD PRODUKSI
+        |--------------------------------------------------------------------------
+        | Menampilkan detail data telur.
+        */
+        $dataQuery = SensorLog::query();
+
+        if ($start && $end) {
+            $dataQuery->whereBetween('tanggal', [$from, $to]);
+        }
+
+        $data = $dataQuery
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('waktu', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('produksi.index', compact(
-            'total','layak','tidak','rata',
-            'chart','data',
-            'start','end'
+            'total',
+            'layak',
+            'tidak',
+            'rata',
+            'persentaseLayak',
+            'persentaseTidak',
+            'chart',
+            'data',
+            'start',
+            'end'
         ));
     }
 
     public function exportPdf(Request $request)
     {
-        $start = $request->start ?? now()->subDays(7)->format('Y-m-d');
-        $end   = $request->end ?? now()->format('Y-m-d');
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER TANGGAL UNTUK PDF
+        |--------------------------------------------------------------------------
+        */
+        $start = $request->start;
+        $end   = $request->end;
 
-        $logs = SensorLog::whereBetween('created_at', [$start, $end])->get();
+        $query = SensorLog::query();
 
-        $total = $logs->sum('units');
-        $layak = $logs->where('status','PRODUKTIF')->sum('units');
-        $tidak = $logs->whereIn('status',['PERINGATAN','WASPADA'])->sum('units');
+        if ($start && $end) {
+            $from = Carbon::parse($start)->toDateString();
+            $to   = Carbon::parse($end)->toDateString();
+
+            $query->whereBetween('tanggal', [$from, $to]);
+        }
+
+        $logs = $query
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('waktu', 'desc')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUMMARY PDF
+        |--------------------------------------------------------------------------
+        */
+        $total = $logs->count();
+        $layak = $logs->where('status', 'layak')->count();
+        $tidak = $logs->where('status', 'tidak')->count();
+
+        $persentaseLayak = $total > 0
+            ? round(($layak / $total) * 100, 2)
+            : 0;
+
+        $persentaseTidak = $total > 0
+            ? round(($tidak / $total) * 100, 2)
+            : 0;
+
+        $namaFile = ($start && $end)
+            ? "laporan-produksi-$start-$end.pdf"
+            : "laporan-produksi-semua-data.pdf";
 
         $pdf = PDF::loadView('pdf.produksi', compact(
-            'logs','total','layak','tidak','start','end'
-        ))->setPaper('A4','portrait');
+            'logs',
+            'total',
+            'layak',
+            'tidak',
+            'persentaseLayak',
+            'persentaseTidak',
+            'start',
+            'end'
+        ))->setPaper('A4', 'portrait');
 
-        return $pdf->download("laporan-$start-$end.pdf");
+        return $pdf->download($namaFile);
     }
 }

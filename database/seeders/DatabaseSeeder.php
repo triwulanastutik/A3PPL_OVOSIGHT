@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             SensorLogSeeder::class,
             BatchSeeder::class,
+            ScheduleSeeder::class,
         ]);
     }
 }

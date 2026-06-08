@@ -9,34 +9,30 @@ class BatchSeeder extends Seeder
 {
     public function run(): void
     {
+        Batch::query()->delete();
+
         Batch::create([
-            'kode_batch' => 'A001',
-            'kandang' => 'Kandang A',
-            'jenis_ayam' => 'ISA Brown',
+            'id_kandang' => 'KDG-001',
+            'jenis_ayam' => 'ras_petelur',
             'tanggal_masuk' => '2025-01-01',
-            'umur_minggu' => 25,
             'populasi' => 2500,
-            'status_produksi' => 'Produktif'
+            'status_produksi' => 'Produktif',
         ]);
 
         Batch::create([
-            'kode_batch' => 'B001',
-            'kandang' => 'Kandang B',
-            'jenis_ayam' => 'Lohmann',
+            'id_kandang' => 'KDG-002',
+            'jenis_ayam' => 'ras_petelur',
             'tanggal_masuk' => '2024-01-01',
-            'umur_minggu' => 75,
             'populasi' => 1800,
-            'status_produksi' => 'Mendekati Afkir'
+            'status_produksi' => 'Mendekati Afkir',
         ]);
 
         Batch::create([
-            'kode_batch' => 'C001',
-            'kandang' => 'Kandang C',
-            'jenis_ayam' => 'Hy-Line',
+            'id_kandang' => 'KDG-003',
+            'jenis_ayam' => 'kampung',
             'tanggal_masuk' => '2023-01-01',
-            'umur_minggu' => 85,
             'populasi' => 1500,
-            'status_produksi' => 'Afkir'
+            'status_produksi' => 'Afkir',
         ]);
     }
 }

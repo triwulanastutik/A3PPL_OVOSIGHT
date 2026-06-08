@@ -9,13 +9,21 @@ return new class extends Migration {
     {
         Schema::create('sensor_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('sensor_id');
-            $table->string('batch');
-            $table->float('berat');
-            $table->integer('ir');
-            $table->integer('units');
-            $table->enum('status', ['PRODUKTIF', 'PERINGATAN', 'WASPADA']);
-            $table->timestamp('waktu')->nullable();
+
+            // ID telur, menggantikan sensor_id
+            $table->string('id_telur')->unique();
+
+            // Tanggal dan waktu pengecekan telur
+            $table->date('tanggal');
+            $table->time('waktu');
+
+            // Data sensor
+            $table->decimal('berat', 6, 2);
+            $table->integer('cahaya');
+
+            // Status klasifikasi telur
+            $table->enum('status', ['layak', 'tidak']);
+
             $table->timestamps();
         });
     }
