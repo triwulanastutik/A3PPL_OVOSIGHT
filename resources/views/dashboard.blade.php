@@ -177,9 +177,6 @@
 
                 <div class="mb-5">
                     <h2 class="font-bold text-lg">Grafik Klasifikasi Telur Mingguan</h2>
-                    <p class="text-xs text-slate-400 mt-1">
-                        Sumbu X = hari, sumbu Y = jumlah telur. Setiap hari menampilkan telur layak dan tidak layak.
-                    </p>
                 </div>
 
                 <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
@@ -201,8 +198,29 @@
     const chartLayak = @json($chartLayak);
     const chartTidak = @json($chartTidak);
 
-    const maxValue = Math.max(...chartLayak, ...chartTidak, 10);
-    const suggestedMax = Math.ceil((maxValue + 5) / 10) * 10;
+    // Hitung max value dari data, fallback minimum 50
+    const maxValue = Math.max(...chartLayak, ...chartTidak, 50);
+
+    // Tentukan stepSize dan suggestedMax secara dinamis:
+    // - Data <= 100  : step 10, max 100
+    // - Data <= 150  : step 10, max 150
+    // - Data <= 200  : step 20, max 200  (step 10 terlalu padat)
+    // - Data > 200   : step 20, max dibulatkan ke kelipatan 20 terdekat ke atas
+    let stepSize, suggestedMax;
+
+    if (maxValue <= 100) {
+        stepSize = 10;
+        suggestedMax = 100;
+    } else if (maxValue <= 150) {
+        stepSize = 10;
+        suggestedMax = 150;
+    } else if (maxValue <= 200) {
+        stepSize = 20;
+        suggestedMax = 200;
+    } else {
+        stepSize = 20;
+        suggestedMax = Math.ceil((maxValue + 20) / 20) * 20;
+    }
 
     const valueLabelPlugin = {
         id: 'valueLabelPlugin',
@@ -215,11 +233,12 @@
                 meta.data.forEach((bar, index) => {
                     const value = dataset.data[index];
 
-                    if (value === null || value === undefined) return;
+                    // Jangan tampilkan label kalau nilai 0
+                    if (!value || value === 0) return;
 
                     ctx.save();
-                    ctx.font = 'bold 12px sans-serif';
-                    ctx.fillStyle = '#e5e7eb';
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.fillStyle = '#f1f5f9';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(value, bar.x, bar.y - 4);
@@ -257,7 +276,7 @@
             maintainAspectRatio: true,
             layout: {
                 padding: {
-                    top: 24
+                    top: 28
                 }
             },
             plugins: {
@@ -290,7 +309,7 @@
                     suggestedMax: suggestedMax,
                     ticks: {
                         color: '#cbd5e1',
-                        stepSize: 10,
+                        stepSize: stepSize,
                         precision: 0
                     },
                     title: {

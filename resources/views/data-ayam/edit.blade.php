@@ -51,7 +51,6 @@
         <div class="px-3 py-4 border-t border-slate-800">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-
                 <button type="submit"
                         class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-slate-800">
                     Keluar
@@ -113,7 +112,7 @@
                 <div class="px-5 py-4 border-b border-slate-700">
                     <h2 class="font-bold">Form Edit Data Ayam</h2>
                     <p class="text-xs text-slate-400 mt-1">
-                        Umur ayam dihitung otomatis dari tanggal masuk.
+                        Umur dihitung otomatis dari tanggal masuk. Status Afkir jika umur di atas 100 minggu.
                     </p>
                 </div>
 
@@ -141,28 +140,6 @@
                         </p>
                     </div>
 
-                    {{-- JENIS AYAM --}}
-                    <div>
-                        <label class="block text-sm text-slate-300 mb-1">
-                            Jenis Ayam
-                        </label>
-
-                        <select name="jenis_ayam"
-                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <option value="">Pilih jenis ayam</option>
-
-                            <option value="kampung"
-                                {{ old('jenis_ayam', $batch->jenis_ayam) === 'kampung' ? 'selected' : '' }}>
-                                Kampung
-                            </option>
-
-                            <option value="negeri"
-                                {{ old('jenis_ayam', $batch->jenis_ayam) === 'negeri' ? 'selected' : '' }}>
-                                Negeri
-                            </option>
-                        </select>
-                    </div>
-
                     {{-- TANGGAL MASUK --}}
                     <div>
                         <label class="block text-sm text-slate-300 mb-1">
@@ -182,7 +159,6 @@
                             Umur akan berubah otomatis setiap minggu.
                         </p>
                     </div>
-                          
 
                     {{-- POPULASI --}}
                     <div>

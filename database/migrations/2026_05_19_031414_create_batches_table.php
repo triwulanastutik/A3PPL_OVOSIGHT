@@ -8,34 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('batches', function (Blueprint $table) {
-            $table->id();
-
-            // Menggantikan kode_batch / id batch
-            $table->string('id_kandang')->unique();
-
-            // Jenis ayam untuk konteks peternakan ayam petelur
-            $table->enum('jenis_ayam', ['kampung', 'ras_petelur']);
-
-            // Dipakai untuk menghitung umur ayam otomatis setiap minggu
-            $table->date('tanggal_masuk');
-
-            // Jumlah ayam dalam kandang
-            $table->integer('populasi')->nullable();
-
-            // Status produksi ayam
-            $table->enum('status_produksi', [
-                'Produktif',
-                'Mendekati Afkir',
-                'Afkir'
-            ])->default('Produktif');
-
-            $table->timestamps();
+        Schema::table('batches', function (Blueprint $table) {
+            $table->dropColumn('jenis_ayam');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('batches');
+        Schema::table('batches', function (Blueprint $table) {
+            $table->string('jenis_ayam')->after('id_kandang');
+        });
     }
 };

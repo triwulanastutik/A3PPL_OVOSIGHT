@@ -240,10 +240,6 @@
                         <h2 class="font-bold">
                             Grafik Produksi Telur
                         </h2>
-
-                        <p class="text-xs text-slate-400">
-                            Sumbu X = tanggal produksi, sumbu Y = jumlah telur
-                        </p>
                     </div>
                 </div>
 

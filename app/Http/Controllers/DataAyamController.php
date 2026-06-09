@@ -19,8 +19,6 @@ class DataAyamController extends Controller
         |--------------------------------------------------------------------------
         | UPDATE STATUS PRODUKSI OTOMATIS
         |--------------------------------------------------------------------------
-        | Status produksi dihitung dari umur ayam.
-        | Umur ayam berasal dari tanggal_masuk dan accessor di model Batch.
         */
         $allBatches = Batch::all();
 
@@ -46,13 +44,8 @@ class DataAyamController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('id_kandang', 'like', '%' . $search . '%')
-                  ->orWhere('jenis_ayam', 'like', '%' . $search . '%')
                   ->orWhere('status_produksi', 'like', '%' . $search . '%');
             });
-        }
-
-        if ($request->filled('jenis_ayam')) {
-            $query->where('jenis_ayam', $request->jenis_ayam);
         }
 
         if ($request->filled('status_produksi')) {
@@ -86,7 +79,6 @@ class DataAyamController extends Controller
     {
         $request->validate([
             'id_kandang'    => 'required|string|max:255|unique:batches,id_kandang',
-            'jenis_ayam'    => 'required|in:kampung,negeri',
             'tanggal_masuk' => 'required|date',
             'populasi'      => 'required|integer|min:1',
         ]);
@@ -96,7 +88,6 @@ class DataAyamController extends Controller
 
         Batch::create([
             'id_kandang'      => $request->id_kandang,
-            'jenis_ayam'      => $request->jenis_ayam,
             'tanggal_masuk'   => $request->tanggal_masuk,
             'populasi'        => $request->populasi,
             'status_produksi' => $this->getStatus($umurMinggu),
@@ -152,7 +143,6 @@ class DataAyamController extends Controller
 
         $request->validate([
             'id_kandang'    => 'required|string|max:255|unique:batches,id_kandang,' . $batch->id,
-            'jenis_ayam'    => 'required|in:kampung,negeri',
             'tanggal_masuk' => 'required|date',
             'populasi'      => 'required|integer|min:1',
         ]);
@@ -162,7 +152,6 @@ class DataAyamController extends Controller
 
         $batch->update([
             'id_kandang'      => $request->id_kandang,
-            'jenis_ayam'      => $request->jenis_ayam,
             'tanggal_masuk'   => $request->tanggal_masuk,
             'populasi'        => $request->populasi,
             'status_produksi' => $this->getStatus($umurMinggu),
@@ -192,16 +181,13 @@ class DataAyamController extends Controller
     |--------------------------------------------------------------------------
     | LOGIC STATUS PRODUKSI
     |--------------------------------------------------------------------------
-    | Umur ayam dihitung otomatis dari tanggal_masuk.
+    | Produktif  : 0 - 100 minggu
+    | Afkir      : > 100 minggu
     */
     private function getStatus($umurMinggu)
     {
-        if ($umurMinggu < 75) {
+        if ($umurMinggu <= 100) {
             return 'Produktif';
-        }
-
-        if ($umurMinggu < 80) {
-            return 'Mendekati Afkir';
         }
 
         return 'Afkir';

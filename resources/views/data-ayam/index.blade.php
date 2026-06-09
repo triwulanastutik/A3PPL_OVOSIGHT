@@ -101,7 +101,7 @@
                 <div>
                     <h1 class="text-2xl font-bold">Data Ayam</h1>
                     <p class="text-slate-400 text-sm mt-1">
-                        Pantau populasi, umur, jenis ayam, dan status produksi per kandang.
+                        Pantau populasi, umur, dan status produksi per kandang.
                     </p>
                 </div>
 
@@ -119,15 +119,10 @@
             @endif
 
             {{-- SUMMARY --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                     <p class="text-xs text-slate-400">Total Kandang</p>
                     <h2 class="text-2xl font-bold mt-1">{{ number_format($totalKandang) }}</h2>
-                </div>
-
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                    <p class="text-xs text-slate-400">Total Populasi</p>
-                    <h2 class="text-2xl font-bold text-blue-400 mt-1">{{ number_format($totalPopulasi) }}</h2>
                 </div>
 
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
@@ -144,26 +139,16 @@
             {{-- FILTER --}}
             <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-6">
                 <form method="GET" action="{{ route('data.ayam') }}"
-                      class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                      class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
 
-                    <div class="md:col-span-2">
+                    {{-- <div class="md:col-span-2">
                         <label class="block text-xs text-slate-400 mb-1">Pencarian</label>
                         <input type="text"
                                name="search"
                                value="{{ request('search') }}"
-                               placeholder="Cari ID kandang, jenis, atau status..."
+                               placeholder="Cari ID kandang atau status..."
                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Jenis Ayam</label>
-                        <select name="jenis_ayam"
-                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <option value="">Semua Jenis</option>
-                            <option value="kampung" {{ request('jenis_ayam') === 'kampung' ? 'selected' : '' }}>Kampung</option>
-                            <option value="negeri" {{ request('jenis_ayam') === 'negeri' ? 'selected' : '' }}>Negeri</option>
-                        </select>
-                    </div>
+                    </div> --}}
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">Status</label>
@@ -171,7 +156,6 @@
                                 class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Semua Status</option>
                             <option value="Produktif" {{ request('status_produksi') === 'Produktif' ? 'selected' : '' }}>Produktif</option>
-                            <option value="Mendekati Afkir" {{ request('status_produksi') === 'Mendekati Afkir' ? 'selected' : '' }}>Mendekati Afkir</option>
                             <option value="Afkir" {{ request('status_produksi') === 'Afkir' ? 'selected' : '' }}>Afkir</option>
                         </select>
                     </div>
@@ -197,7 +181,7 @@
                     <div>
                         <h2 class="font-bold">Daftar Data Ayam</h2>
                         <p class="text-xs text-slate-400 mt-1">
-                            Umur ayam dihitung otomatis dari tanggal masuk.
+                            Umur ayam dihitung otomatis dari tanggal masuk. Status Afkir jika umur di atas 100 minggu.
                         </p>
                     </div>
 
@@ -213,7 +197,6 @@
                         <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
                             <tr>
                                 <th class="px-4 py-3">ID Kandang</th>
-                                <th class="px-4 py-3">Jenis</th>
                                 <th class="px-4 py-3">Tanggal Masuk</th>
                                 <th class="px-4 py-3">Umur</th>
                                 <th class="px-4 py-3">Populasi</th>
@@ -228,15 +211,6 @@
 
                                     <td class="px-4 py-3 font-semibold text-white">
                                         {{ $batch->id_kandang }}
-                                    </td>
-
-                                    <td class="px-4 py-3">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold
-                                            {{ $batch->jenis_ayam === 'kampung'
-                                                ? 'bg-yellow-500/20 text-yellow-300'
-                                                : 'bg-blue-500/20 text-blue-300' }}">
-                                            {{ $batch->jenis_ayam === 'kampung' ? 'Kampung' : 'Negeri' }}
-                                        </span>
                                     </td>
 
                                     <td class="px-4 py-3 text-slate-300">
@@ -255,10 +229,6 @@
                                         @if($batch->status_produksi === 'Produktif')
                                             <span class="bg-green-600 px-3 py-1 rounded-full text-xs font-semibold text-white">
                                                 Produktif
-                                            </span>
-                                        @elseif($batch->status_produksi === 'Mendekati Afkir')
-                                            <span class="bg-yellow-500 px-3 py-1 rounded-full text-xs font-semibold text-black">
-                                                Mendekati Afkir
                                             </span>
                                         @else
                                             <span class="bg-red-600 px-3 py-1 rounded-full text-xs font-semibold text-white">
@@ -291,7 +261,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-4 py-8 text-center text-slate-400">
+                                    <td colspan="6" class="px-4 py-8 text-center text-slate-400">
                                         Tidak ada data ayam yang ditemukan.
                                     </td>
                                 </tr>

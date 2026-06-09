@@ -12,9 +12,8 @@ class Batch extends Model
 
     protected $table = 'batches';
 
-    protected $fillable = [
+    protected $fillable = [ 
         'id_kandang',
-        'jenis_ayam',
         'tanggal_masuk',
         'populasi',
         'status_produksi',
