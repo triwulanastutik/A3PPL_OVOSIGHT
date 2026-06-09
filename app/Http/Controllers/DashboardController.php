@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
         /*
         |--------------------------------------------------------------------------
-        | DATA TELUR TERBARU
+        | DATA TELUR TERBARU UNTUK MONITOR REAL-TIME
         |--------------------------------------------------------------------------
         */
         $latestLog = SensorLog::orderBy('tanggal', 'desc')
@@ -21,55 +21,57 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | DATA HARI INI
+        | GRAFIK MINGGUAN DASHBOARD
         |--------------------------------------------------------------------------
+        | Sumbu X = Senin sampai Minggu
+        | Sumbu Y = jumlah telur
+        | Dataset = Layak dan Tidak Layak
         */
-        $today = Carbon::today()->toDateString();
+        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek   = Carbon::now()->endOfWeek(Carbon::SUNDAY);
 
-        $todayLogs = SensorLog::whereDate('tanggal', $today)->get();
+        $weekLogs = SensorLog::whereBetween('tanggal', [
+                $startOfWeek->toDateString(),
+                $endOfWeek->toDateString(),
+            ])
+            ->get();
 
-        $totalTelur = $todayLogs->count();
-        $totalLayak = $todayLogs->where('status', 'layak')->count();
-        $totalTidak = $todayLogs->where('status', 'tidak')->count();
+        $namaHari = [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu',
+        ];
 
-        /*
-        |--------------------------------------------------------------------------
-        | PERBANDINGAN DENGAN KEMARIN
-        |--------------------------------------------------------------------------
-        */
-        $yesterday = Carbon::yesterday()->toDateString();
+        $chart = [];
 
-        $yesterdayTotal = SensorLog::whereDate('tanggal', $yesterday)->count();
+        for ($i = 0; $i < 7; $i++) {
+            $tanggal = $startOfWeek->copy()->addDays($i);
+            $tanggalKey = $tanggal->toDateString();
 
-        $trendJumlah = $totalTelur - $yesterdayTotal;
+            $logsHariIni = $weekLogs->filter(function ($log) use ($tanggalKey) {
+                return Carbon::parse($log->tanggal)->toDateString() === $tanggalKey;
+            });
 
-        $trendPercent = $yesterdayTotal > 0
-            ? round((($totalTelur - $yesterdayTotal) / $yesterdayTotal) * 100, 1)
-            : 0;
+            $chart[] = [
+                'hari'  => $namaHari[$tanggal->dayOfWeekIso],
+                'layak' => $logsHariIni->where('status', 'layak')->count(),
+                'tidak' => $logsHariIni->where('status', 'tidak')->count(),
+            ];
+        }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PERSENTASE KLASIFIKASI
-        |--------------------------------------------------------------------------
-        */
-        $persenLayak = $totalTelur > 0
-            ? round(($totalLayak / $totalTelur) * 100, 2)
-            : 0;
-
-        $persenTidak = $totalTelur > 0
-            ? round(($totalTidak / $totalTelur) * 100, 2)
-            : 0;
+        $chartLabels = collect($chart)->pluck('hari')->values();
+        $chartLayak  = collect($chart)->pluck('layak')->values();
+        $chartTidak  = collect($chart)->pluck('tidak')->values();
 
         return view('dashboard', compact(
             'latestLog',
-            'totalTelur',
-            'totalLayak',
-            'totalTidak',
-            'persenLayak',
-            'persenTidak',
-            'yesterdayTotal',
-            'trendJumlah',
-            'trendPercent'
+            'chartLabels',
+            'chartLayak',
+            'chartTidak'
         ));
     }
 }

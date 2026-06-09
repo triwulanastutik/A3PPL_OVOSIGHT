@@ -207,14 +207,17 @@
                                     $isToday = $date->isSameDay($today);
                                 @endphp
 
-                                <div class="min-h-[92px] bg-slate-800 p-2 hover:bg-slate-700/70 transition">
-                                    <a href="{{ route('jadwal.vaksinasi.create', ['tanggal' => $dateKey]) }}"
-                                       class="inline-flex w-7 h-7 items-center justify-center rounded-full text-sm font-semibold
-                                           {{ $isToday ? 'bg-green-600 text-white' : 'text-slate-300 hover:bg-slate-600' }}">
-                                        {{ $day }}
-                                    </a>
+                                <a href="{{ route('jadwal.vaksinasi.create', ['tanggal' => $dateKey]) }}"
+                                   class="block min-h-[92px] bg-slate-800 p-2 hover:bg-slate-700/70 transition cursor-pointer">
 
-                                    <div class="space-y-1 mt-2">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="w-7 h-7 flex items-center justify-center rounded-full text-sm font-semibold
+                                            {{ $isToday ? 'bg-green-600 text-white' : 'text-slate-300' }}">
+                                            {{ $day }}
+                                        </span>
+                                    </div>
+
+                                    <div class="space-y-1">
                                         @foreach($jadwalHariIni->take(2) as $jadwal)
                                             @php
                                                 $isTerlewat = $jadwal->status === 'belum'
@@ -237,7 +240,8 @@
                                             </p>
                                         @endif
                                     </div>
-                                </div>
+
+                                </a>
                             @endfor
                         </div>
                     </div>
