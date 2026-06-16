@@ -8,11 +8,9 @@ use Illuminate\Http\Request;
 
 class SensorController extends Controller
 {
-    public function store(Request $request)
-    {
-        try {
+        public function store(Request $request)
+        {
 
-            // VALIDASI (dibuat sedikit lebih fleksibel untuk ESP32)
             $request->validate([
                 'id_telur' => 'required|string',
                 'berat'    => 'required|numeric',
@@ -20,31 +18,17 @@ class SensorController extends Controller
                 'status'   => 'required|string',
             ]);
 
-            // SIMPAN KE SUPABASE
-            $log = SensorLog::create([
-                'id_telur' => $request->id_telur,
+            SensorLog::create([
+                'id_telur' => $request->id_telur . '-' . uniqid(),
                 'tanggal'  => now()->toDateString(),
                 'waktu'    => now()->format('H:i:s'),
                 'berat'    => $request->berat,
-                'cahaya'   => $request->ir, // mapping ESP32 IR → Supabase cahaya
+                'cahaya'   => $request->ir,
                 'status'   => strtolower($request->status),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil disimpan',
-                'data' => $log
-            ], 201);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menyimpan data',
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['ok' => true]);
         }
-    }
 
     public function latest()
     {

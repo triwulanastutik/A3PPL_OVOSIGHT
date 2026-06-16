@@ -5,10 +5,16 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\DataAyamController;
 use App\Http\Controllers\JadwalVaksinasiController;
+use App\Http\Controllers\Api\SensorController;
 
 Route::get('/', function () {
     return redirect('/login');
 });
+
+
+
+Route::post('/sensor', [SensorController::class, 'store']);
+Route::get('/latest', [SensorController::class, 'latest']);
 
 
 
@@ -90,12 +96,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-// ===== API untuk ESP32 & Polling =====
-Route::post('/api/sensor',
-    [App\Http\Controllers\Api\SensorController::class, 'store']);
-
-Route::get('/api/latest',
-    [App\Http\Controllers\Api\SensorController::class, 'latest']);
 
 
 // ===== Jadwal Vaksinasi =====

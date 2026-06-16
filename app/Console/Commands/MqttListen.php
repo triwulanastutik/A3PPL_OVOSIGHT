@@ -21,11 +21,13 @@ class MqttListen extends Command
         $connectionSettings = (new ConnectionSettings)
             ->setUsername('IdGs2063')
             ->setPassword('IdGs2063&')
-            ->setUseTls(true);
+            ->setUseTls(true)
+            ->setTlsSelfSignedAllowed(true)
+            ->setTlsVerifyPeer(false);
 
         $mqtt = new MqttClient($server, $port, $clientId);
-
-        $mqtt->connect($connectionSettings, true);
+    try {
+        $mqtt->connect($connectionSettings);
 
         $this->info('MQTT Connected!');
 
@@ -36,12 +38,12 @@ class MqttListen extends Command
             $data = json_decode($message, true);
 
             DB::table('sensor_logs')->insert([
-                'id_telur'   => $data['id_telur'] ?? null,
-                'berat'      => $data['berat'] ?? 0,
-                'cahaya'     => $data['ir'] ?? 0,
-                'status'     => $data['status'] ?? 'UNKNOWN',
-                'tanggal'    => now()->toDateString(),
-                'waktu'      => now()->format('H:i:s'),
+                'id_telur' => $data['id_telur'] ?? null,
+                'berat' => $data['berat'] ?? 0,
+                'cahaya' => $data['ir'] ?? 0,
+                'status' => $data['status'] ?? 'tidak',
+                'tanggal' => now()->toDateString(),
+                'waktu' => now()->format('H:i:s'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -50,5 +52,9 @@ class MqttListen extends Command
         }, 0);
 
         $mqtt->loop(true);
+
+    } catch (\Exception $e) {
+        $this->error("MQTT ERROR: " . $e->getMessage());
+    }
     }
 }
