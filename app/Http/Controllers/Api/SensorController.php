@@ -8,51 +8,78 @@ use Illuminate\Http\Request;
 
 class SensorController extends Controller
 {
-    // Endpoint untuk ESP32 kirim data
     public function store(Request $request)
     {
-        $request->validate([
-            'sensor_id'  => 'required|string',
-            'batch'      => 'required|string',
-            'berat'      => 'required|numeric',
-            'ir'         => 'required|integer',
-            'units'      => 'required|integer',
-            'status'     => 'required|in:PRODUKTIF,PERINGATAN,WASPADA',
-        ]);
+        try {
 
-        $log = SensorLog::create([
-            'sensor_id' => $request->sensor_id,
-            'batch'     => $request->batch,
-            'berat'     => $request->berat,
-            'ir'        => $request->ir,
-            'units'     => $request->units,
-            'status'    => $request->status,
-            'waktu'     => now(),
-        ]);
+            // VALIDASI (dibuat sedikit lebih fleksibel untuk ESP32)
+            $request->validate([
+                'id_telur' => 'required|string',
+                'berat'    => 'required|numeric',
+                'ir'       => 'required|integer',
+                'status'   => 'required|string',
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'data'    => $log,
-        ], 201);
+            // SIMPAN KE SUPABASE
+            $log = SensorLog::create([
+                'id_telur' => $request->id_telur,
+                'tanggal'  => now()->toDateString(),
+                'waktu'    => now()->format('H:i:s'),
+                'berat'    => $request->berat,
+                'cahaya'   => $request->ir, // mapping ESP32 IR → Supabase cahaya
+                'status'   => strtolower($request->status),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil disimpan',
+                'data' => $log
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    // Endpoint polling untuk dashboard real-time
     public function latest()
     {
-        $latest = SensorLog::latest()->take(10)->get();
+        try {
 
-        $todayTotal    = SensorLog::whereDate('created_at', today())->sum('units');
-        $todayLayak    = SensorLog::whereDate('created_at', today())->where('status', 'PRODUKTIF')->sum('units');
-        $todayTidak    = SensorLog::whereDate('created_at', today())->whereIn('status', ['PERINGATAN', 'WASPADA'])->sum('units');
+            $latest = SensorLog::orderBy('id', 'desc')->limit(10)->get();
 
-        $lastLog = SensorLog::latest()->first();
+            $todayTotal = SensorLog::whereDate('tanggal', now()->toDateString())->count();
 
-        return response()->json([
-            'logs'        => $latest,
-            'todayTotal'  => $todayTotal,
-            'todayLayak'  => $todayLayak,
-            'todayTidak'  => $todayTidak,
-            'lastLog'     => $lastLog,
-        ]);
+            $todayLayak = SensorLog::whereDate('tanggal', now()->toDateString())
+                ->where('status', 'layak')
+                ->count();
+
+            $todayTidak = SensorLog::whereDate('tanggal', now()->toDateString())
+                ->where('status', 'tidak')
+                ->count();
+
+            $lastLog = SensorLog::orderBy('id', 'desc')->first();
+
+            return response()->json([
+                'success' => true,
+                'logs' => $latest,
+                'todayTotal' => $todayTotal,
+                'todayLayak' => $todayLayak,
+                'todayTidak' => $todayTidak,
+                'lastLog' => $lastLog,
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

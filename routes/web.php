@@ -1,11 +1,17 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\DataAyamController;
 use App\Http\Controllers\JadwalVaksinasiController;
+
+Route::get('/', function () {
+    return redirect('/login');
+});
+
+
+
 
 // ===== AUTH =====
 Route::get('/login', [LoginController::class, 'showLoginForm'])
