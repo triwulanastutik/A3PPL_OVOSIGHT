@@ -17,6 +17,6 @@ class SensorLog extends Model
 
     protected $casts = [
         'tanggal' => 'date',
-        'berat' => 'decimal:2',
+        'berat' => 'float',
     ];
 }

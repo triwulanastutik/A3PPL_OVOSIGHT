@@ -198,14 +198,8 @@
     const chartLayak = @json($chartLayak);
     const chartTidak = @json($chartTidak);
 
-    // Hitung max value dari data, fallback minimum 50
     const maxValue = Math.max(...chartLayak, ...chartTidak, 50);
 
-    // Tentukan stepSize dan suggestedMax secara dinamis:
-    // - Data <= 100  : step 10, max 100
-    // - Data <= 150  : step 10, max 150
-    // - Data <= 200  : step 20, max 200  (step 10 terlalu padat)
-    // - Data > 200   : step 20, max dibulatkan ke kelipatan 20 terdekat ke atas
     let stepSize, suggestedMax;
 
     if (maxValue <= 100) {
@@ -233,7 +227,6 @@
                 meta.data.forEach((bar, index) => {
                     const value = dataset.data[index];
 
-                    // Jangan tampilkan label kalau nilai 0
                     if (!value || value === 0) return;
 
                     ctx.save();
@@ -326,6 +319,10 @@
         plugins: [valueLabelPlugin]
     });
 
+    // =====================================================
+    // REALTIME POLLING — fix: endpoint /latest (bukan /api/latest)
+    // =====================================================
+
     function formatTanggal(value) {
         if (!value) return '-';
 
@@ -367,22 +364,37 @@
         };
     }
 
+    // Simpan id_telur terakhir untuk deteksi data baru
+    let lastIdTelur = null;
+
     async function fetchLatestSensor() {
         try {
-            const response = await fetch('/api/latest', {
+            // ✅ Fix: /latest bukan /api/latest (sesuai routes/web.php)
+            const response = await fetch('/latest', {
                 headers: {
                     'Accept': 'application/json'
                 }
             });
 
-            const payload = await response.json();
-            const data = payload.data ?? payload.latestLog ?? payload;
+            if (!response.ok) throw new Error('HTTP ' + response.status);
 
+            const payload = await response.json();
+
+            if (!payload.success) {
+                document.getElementById('realtime-indicator').className =
+                    'w-3 h-3 rounded-full bg-yellow-500 inline-block';
+                document.getElementById('realtime-text').textContent = 'Menunggu data...';
+                return;
+            }
+
+            const data = payload.data;
+
+            // Update semua elemen
             document.getElementById('id-telur').textContent =
-                data.id_telur ?? data.sensor_id ?? '-';
+                data.id_telur ?? '-';
 
             document.getElementById('tanggal').textContent =
-                formatTanggal(data.tanggal ?? data.created_at ?? null);
+                formatTanggal(data.tanggal ?? null);
 
             document.getElementById('waktu').textContent =
                 data.waktu ?? '-';
@@ -391,30 +403,43 @@
                 data.berat ?? '-';
 
             document.getElementById('cahaya').textContent =
-                data.cahaya ?? data.ir ?? '-';
+                data.ir ?? data.cahaya ?? '-';
 
             const status = normalizeStatus(data.status);
             const statusEl = document.getElementById('status');
             statusEl.textContent = status.text;
             statusEl.className = status.className;
 
-            document.getElementById('realtime-indicator').className =
-                'w-3 h-3 rounded-full bg-green-500 inline-block';
+            // Indikator: hijau kalau data baru, kuning kalau sama
+            if (lastIdTelur !== data.id_telur) {
+                lastIdTelur = data.id_telur;
+                document.getElementById('realtime-indicator').className =
+                    'w-3 h-3 rounded-full bg-green-500 inline-block animate-pulse';
+                document.getElementById('realtime-text').textContent = 'Data baru masuk!';
 
-            document.getElementById('realtime-text').textContent =
-                'Data real-time aktif';
+                // Setelah 2 detik kembali ke status aktif normal
+                setTimeout(() => {
+                    document.getElementById('realtime-indicator').className =
+                        'w-3 h-3 rounded-full bg-green-500 inline-block';
+                    document.getElementById('realtime-text').textContent = 'Data real-time aktif';
+                }, 2000);
+            } else {
+                document.getElementById('realtime-indicator').className =
+                    'w-3 h-3 rounded-full bg-green-500 inline-block';
+                document.getElementById('realtime-text').textContent = 'Data real-time aktif';
+            }
 
         } catch (error) {
+            console.error('Polling error:', error);
             document.getElementById('realtime-indicator').className =
                 'w-3 h-3 rounded-full bg-red-500 inline-block';
-
-            document.getElementById('realtime-text').textContent =
-                'Gagal mengambil data';
+            document.getElementById('realtime-text').textContent = 'Gagal mengambil data';
         }
     }
 
+    // Jalankan langsung, lalu polling tiap 3 detik
     fetchLatestSensor();
-    setInterval(fetchLatestSensor, 5000);
+    setInterval(fetchLatestSensor, 3000);
 </script>
 
 </body>

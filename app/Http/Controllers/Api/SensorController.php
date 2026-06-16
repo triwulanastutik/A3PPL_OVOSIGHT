@@ -8,62 +8,48 @@ use Illuminate\Http\Request;
 
 class SensorController extends Controller
 {
-        public function store(Request $request)
-        {
+    public function store(Request $request)
+    {
+        $request->validate([
+            'id_telur' => 'required|string',
+            'berat'    => 'required|numeric',
+            'ir'       => 'required|integer',
+            'status'   => 'required|string',
+        ]);
 
-            $request->validate([
-                'id_telur' => 'required|string',
-                'berat'    => 'required|numeric',
-                'ir'       => 'required|integer',
-                'status'   => 'required|string',
-            ]);
+        SensorLog::create([
+            'id_telur' => $request->id_telur . '-' . uniqid(),
+            'tanggal'  => now()->toDateString(),
+            'waktu'    => now()->format('H:i:s'),
+            'berat'    => $request->berat,
+            'cahaya'   => $request->ir,
+            'status'   => strtolower($request->status),
+        ]);
 
-            SensorLog::create([
-                'id_telur' => $request->id_telur . '-' . uniqid(),
-                'tanggal'  => now()->toDateString(),
-                'waktu'    => now()->format('H:i:s'),
-                'berat'    => $request->berat,
-                'cahaya'   => $request->ir,
-                'status'   => strtolower($request->status),
-            ]);
-
-            return response()->json(['ok' => true]);
-        }
+        return response()->json(['ok' => true]);
+    }
 
     public function latest()
     {
-        try {
+        $last = SensorLog::orderBy('id', 'desc')->first();
 
-            $latest = SensorLog::orderBy('id', 'desc')->limit(10)->get();
-
-            $todayTotal = SensorLog::whereDate('tanggal', now()->toDateString())->count();
-
-            $todayLayak = SensorLog::whereDate('tanggal', now()->toDateString())
-                ->where('status', 'layak')
-                ->count();
-
-            $todayTidak = SensorLog::whereDate('tanggal', now()->toDateString())
-                ->where('status', 'tidak')
-                ->count();
-
-            $lastLog = SensorLog::orderBy('id', 'desc')->first();
-
-            return response()->json([
-                'success' => true,
-                'logs' => $latest,
-                'todayTotal' => $todayTotal,
-                'todayLayak' => $todayLayak,
-                'todayTidak' => $todayTidak,
-                'lastLog' => $lastLog,
-            ]);
-
-        } catch (\Exception $e) {
-
+        if (!$last) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil data',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'No data'
+            ]);
         }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id_telur' => $last->id_telur, // ✅ Fix: pakai $last bukan $request
+                'berat'    => $last->berat,
+                'ir'       => $last->cahaya,
+                'status'   => $last->status,
+                'tanggal'  => $last->tanggal,
+                'waktu'    => $last->waktu,
+            ]
+        ]);
     }
 }
