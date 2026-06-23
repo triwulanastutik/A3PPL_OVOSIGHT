@@ -10,7 +10,7 @@ class ScheduleSeeder extends Seeder
 {
     public function run(): void
     {
-        Schedule::query()->delete();
+        Schedule::withTrashed()->forceDelete();
 
         $jadwals = [
             [

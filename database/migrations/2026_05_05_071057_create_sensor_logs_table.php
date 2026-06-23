@@ -4,14 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('sensor_logs', function (Blueprint $table) {
             $table->id();
 
-            // ID telur, menggantikan sensor_id
-            $table->string('id_telur')->unique();
+            // Menggunakan id_kandang, bukan id_telur
+            // Karena data produksi lebih relevan dicatat berdasarkan kandang/batch
+            $table->string('id_kandang', 255);
 
             // Tanggal dan waktu pengecekan telur
             $table->date('tanggal');
@@ -21,8 +23,8 @@ return new class extends Migration {
             $table->decimal('berat', 6, 2);
             $table->integer('cahaya');
 
-            // Status klasifikasi telur
-            $table->enum('status', ['layak', 'tidak']);
+            // Status klasifikasi telur pakai varchar/string, bukan enum
+            $table->string('status', 20);
 
             $table->timestamps();
         });

@@ -4,85 +4,72 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Batch;
+use Carbon\Carbon;
 
 class ManajemenKandangController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | LIST DATA
-    |--------------------------------------------------------------------------
-    */
     public function index()
     {
-        $batches = Batch::all();
+        $batches = Batch::orderBy('created_at', 'desc')->get();
 
         foreach ($batches as $batch) {
-            $batch->status_produksi = $this->getStatus($batch->umur_minggu);
+            $statusTerbaru = $this->getStatus($batch->umur_minggu);
+
+            if ($batch->status_produksi !== $statusTerbaru) {
+                $batch->update([
+                    'status_produksi' => $statusTerbaru,
+                ]);
+            }
         }
 
         return view('manajemen-kandang.index', compact('batches'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORM TAMBAH
-    |--------------------------------------------------------------------------
-    */
     public function create()
     {
         return view('manajemen-kandang.create');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SIMPAN DATA BARU
-    |--------------------------------------------------------------------------
-    */
     public function store(Request $request)
     {
         $request->validate([
-            'kode_batch'    => 'required|unique:batches',
-            'kandang'       => 'required',
-            'jenis_ayam'    => 'required',
+            'id_kandang'    => 'required|string|max:255|unique:batches,id_kandang',
             'tanggal_masuk' => 'required|date',
-            'umur_minggu'   => 'required|integer',
-            'populasi'      => 'required|integer'
+            'populasi'      => 'required|integer|min:1',
         ]);
 
+        $umurMinggu = Carbon::parse($request->tanggal_masuk)
+            ->diffInWeeks(Carbon::today());
+
         Batch::create([
-            'kode_batch'      => $request->kode_batch,
-            'kandang'         => $request->kandang,
-            'jenis_ayam'      => $request->jenis_ayam,
+            'id_kandang'      => $request->id_kandang,
             'tanggal_masuk'   => $request->tanggal_masuk,
-            'umur_minggu'     => $request->umur_minggu,
             'populasi'        => $request->populasi,
-            'status_produksi' => $this->getStatus($request->umur_minggu)
+            'status_produksi' => $this->getStatus($umurMinggu),
         ]);
 
         return redirect()
             ->route('manajemen.kandang')
-            ->with('success', 'Batch berhasil ditambahkan');
+            ->with('success', 'Data kandang berhasil ditambahkan');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETAIL DATA
-    |--------------------------------------------------------------------------
-    */
     public function show($id)
     {
         $batch = Batch::findOrFail($id);
 
-        $batch->status_produksi = $this->getStatus($batch->umur_minggu);
+        $statusTerbaru = $this->getStatus($batch->umur_minggu);
+
+        if ($batch->status_produksi !== $statusTerbaru) {
+            $batch->update([
+                'status_produksi' => $statusTerbaru,
+            ]);
+
+            $batch->status_produksi = $statusTerbaru;
+        }
 
         return view('manajemen-kandang.show', compact('batch'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORM EDIT
-    |--------------------------------------------------------------------------
-    */
     public function edit($id)
     {
         $batch = Batch::findOrFail($id);
@@ -90,66 +77,45 @@ class ManajemenKandangController extends Controller
         return view('manajemen-kandang.edit', compact('batch'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE DATA
-    |--------------------------------------------------------------------------
-    */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'kode_batch'    => 'required|unique:batches,kode_batch,' . $id,
-            'kandang'       => 'required',
-            'jenis_ayam'    => 'required',
-            'tanggal_masuk' => 'required|date',
-            'umur_minggu'   => 'required|integer',
-            'populasi'      => 'required|integer'
-        ]);
-
         $batch = Batch::findOrFail($id);
 
+        $request->validate([
+            'id_kandang'    => 'required|string|max:255|unique:batches,id_kandang,' . $batch->id,
+            'tanggal_masuk' => 'required|date',
+            'populasi'      => 'required|integer|min:1',
+        ]);
+
+        $umurMinggu = Carbon::parse($request->tanggal_masuk)
+            ->diffInWeeks(Carbon::today());
+
         $batch->update([
-            'kode_batch'      => $request->kode_batch,
-            'kandang'         => $request->kandang,
-            'jenis_ayam'      => $request->jenis_ayam,
+            'id_kandang'      => $request->id_kandang,
             'tanggal_masuk'   => $request->tanggal_masuk,
-            'umur_minggu'     => $request->umur_minggu,
             'populasi'        => $request->populasi,
-            'status_produksi' => $this->getStatus($request->umur_minggu)
+            'status_produksi' => $this->getStatus($umurMinggu),
         ]);
 
         return redirect()
             ->route('manajemen.kandang')
-            ->with('success', 'Batch berhasil diupdate');
+            ->with('success', 'Data kandang berhasil diperbarui');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE DATA
-    |--------------------------------------------------------------------------
-    */
     public function destroy($id)
     {
         $batch = Batch::findOrFail($id);
-
         $batch->delete();
 
         return redirect()
             ->route('manajemen.kandang')
-            ->with('success', 'Batch berhasil dihapus');
+            ->with('success', 'Data kandang berhasil dihapus');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGIC STATUS
-    |--------------------------------------------------------------------------
-    */
-    private function getStatus($umur)
+    private function getStatus($umurMinggu)
     {
-        if ($umur < 80) {
+        if ($umurMinggu <= 100) {
             return 'Produktif';
-        } elseif ($umur < 100) {
-            return 'Mendekati Afkir';
         }
 
         return 'Afkir';

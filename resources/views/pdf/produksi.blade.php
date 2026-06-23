@@ -257,7 +257,7 @@
 
 <div class="note">
     Laporan ini menampilkan rekap produksi telur berdasarkan data sensor yang tersimpan pada sistem OvoSight.
-    Detail per telur dapat dilihat langsung melalui halaman Produksi pada dashboard aplikasi.
+    Detail pengecekan berdasarkan kandang atau batch dapat dilihat langsung melalui halaman Produksi pada dashboard aplikasi.
 </div>
 
 <div class="footer">

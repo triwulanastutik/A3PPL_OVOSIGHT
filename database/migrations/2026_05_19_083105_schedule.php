@@ -10,26 +10,14 @@ return new class extends Migration
     {
         Schema::create('schedule', function (Blueprint $table) {
             $table->id();
-
-            // Nama vaksin
             $table->string('nama_vaksin');
-
-            // Input text, bukan dropdown
             $table->string('kandang');
-
-            // Tanggal jadwal vaksinasi
             $table->date('tanggal');
-
-            // Metode pemberian vaksin
             $table->string('metode_pemberian')->nullable();
-
-            // Status vaksinasi
             $table->enum('status', ['belum', 'sudah'])->default('belum');
-
-            // Catatan tambahan
             $table->text('catatan')->nullable();
-
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

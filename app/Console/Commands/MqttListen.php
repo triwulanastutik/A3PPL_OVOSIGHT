@@ -2,59 +2,45 @@
 
 namespace App\Console\Commands;
 
+use App\Models\SensorLog;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use PhpMqtt\Client\MqttClient;
-use PhpMqtt\Client\ConnectionSettings;
+use PhpMqtt\Client\Facades\MQTT;
 
 class MqttListen extends Command
 {
     protected $signature = 'mqtt:listen';
-    protected $description = 'Listen MQTT data';
+
+    protected $description = 'Listen MQTT sensor data and save it to sensor_logs';
 
     public function handle()
     {
-        $server = '2ab8fa55dfbb4297aadc19680815436a.s1.eu.hivemq.cloud';
-        $port = 8883;
-        $clientId = uniqid('laravel-');
+        $this->info('Listening MQTT sensor data...');
 
-        $connectionSettings = (new ConnectionSettings)
-            ->setUsername('IdGs2063')
-            ->setPassword('IdGs2063&')
-            ->setUseTls(true)
-            ->setTlsSelfSignedAllowed(true)
-            ->setTlsVerifyPeer(false);
-
-        $mqtt = new MqttClient($server, $port, $clientId);
-    try {
-        $mqtt->connect($connectionSettings);
-
-        $this->info('MQTT Connected!');
-
-        $mqtt->subscribe('telur/sensor', function ($topic, $message) {
-
-            $this->info("Data masuk: " . $message);
-
+        MQTT::subscribe('ovosight/sensor', function (string $topic, string $message) {
             $data = json_decode($message, true);
 
-            DB::table('sensor_logs')->insert([
-                'id_telur' => $data['id_telur'] ?? null,
-                'berat' => $data['berat'] ?? 0,
-                'cahaya' => $data['ir'] ?? 0,
-                'status' => $data['status'] ?? 'tidak',
-                'tanggal' => now()->toDateString(),
-                'waktu' => now()->format('H:i:s'),
-                'created_at' => now(),
-                'updated_at' => now(),
+            if (!is_array($data)) {
+                $this->error('Invalid MQTT payload: ' . $message);
+                return;
+            }
+
+            $status = strtolower($data['status'] ?? '');
+
+            if (!in_array($status, ['layak', 'tidak'])) {
+                $this->error('Invalid status: ' . ($data['status'] ?? '-'));
+                return;
+            }
+
+            SensorLog::create([
+                'id_kandang' => $data['id_kandang'] ?? 'BATCH-001',
+                'tanggal'    => now()->toDateString(),
+                'waktu'      => now()->format('H:i:s'),
+                'berat'      => $data['berat'] ?? 0,
+                'cahaya'     => $data['ir'] ?? ($data['cahaya'] ?? 0),
+                'status'     => $status,
             ]);
 
-            $this->info('Data berhasil disimpan.');
-        }, 0);
-
-        $mqtt->loop(true);
-
-    } catch (\Exception $e) {
-        $this->error("MQTT ERROR: " . $e->getMessage());
-    }
+            $this->info('Data sensor berhasil disimpan: ' . json_encode($data));
+        });
     }
 }

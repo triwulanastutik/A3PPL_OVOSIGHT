@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class SensorLog extends Model
 {
+    protected $table = 'sensor_logs';
+
     protected $fillable = [
-        'id_telur',
+        'id_kandang',
         'tanggal',
         'waktu',
         'berat',
@@ -18,5 +20,6 @@ class SensorLog extends Model
     protected $casts = [
         'tanggal' => 'date',
         'berat' => 'float',
+        'cahaya' => 'integer',
     ];
 }

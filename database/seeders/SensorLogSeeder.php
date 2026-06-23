@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use RuntimeException;
 
 class SensorLogSeeder extends Seeder
 {
@@ -12,17 +13,24 @@ class SensorLogSeeder extends Seeder
     {
         DB::table('sensor_logs')->delete();
 
+        $idKandang = DB::table('batches')
+            ->orderBy('id')
+            ->value('id_kandang');
+
+        if (!$idKandang) {
+            throw new RuntimeException('Data batches belum ada. Jalankan BatchSeeder sebelum SensorLogSeeder.');
+        }
+
         $data = [];
-        $nomorTelur = 1;
 
         $startDate = Carbon::create(2026, 3, 1, 8, 0, 0);
 
         for ($dayOffset = 0; $dayOffset <= 30; $dayOffset += 2) {
             $tanggal = $startDate->copy()->addDays($dayOffset);
 
-            $jumlahTelur = rand(10, 30);
+            $jumlahPengecekan = rand(10, 30);
 
-            for ($i = 0; $i < $jumlahTelur; $i++) {
+            for ($i = 0; $i < $jumlahPengecekan; $i++) {
                 $waktu = $tanggal->copy()->addMinutes($i * 3);
 
                 $berat = rand(40, 72);
@@ -35,7 +43,7 @@ class SensorLogSeeder extends Seeder
                 }
 
                 $data[] = [
-                    'id_telur'   => 'TELUR-' . str_pad($nomorTelur, 4, '0', STR_PAD_LEFT),
+                    'id_kandang' => $idKandang,
                     'tanggal'    => $waktu->toDateString(),
                     'waktu'      => $waktu->format('H:i:s'),
                     'berat'      => $berat,
@@ -44,8 +52,6 @@ class SensorLogSeeder extends Seeder
                     'created_at' => $waktu,
                     'updated_at' => $waktu,
                 ];
-
-                $nomorTelur++;
             }
         }
 

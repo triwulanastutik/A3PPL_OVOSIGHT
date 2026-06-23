@@ -11,22 +11,43 @@ class SensorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_telur' => 'required|string',
-            'berat'    => 'required|numeric',
-            'ir'       => 'required|integer',
-            'status'   => 'required|string',
+            'id_kandang' => 'required|string|max:255',
+            'berat'      => 'required|numeric',
+            'ir'         => 'required|integer',
+            'status'     => 'required|string',
         ]);
 
-        SensorLog::create([
-            'id_telur' => $request->id_telur . '-' . uniqid(),
-            'tanggal'  => now()->toDateString(),
-            'waktu'    => now()->format('H:i:s'),
-            'berat'    => $request->berat,
-            'cahaya'   => $request->ir,
-            'status'   => strtolower($request->status),
+        $status = strtolower($request->status);
+
+        if (!in_array($status, ['layak', 'tidak'])) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Status harus layak atau tidak',
+            ], 422);
+        }
+
+        $sensorLog = SensorLog::create([
+            'id_kandang' => $request->id_kandang,
+            'tanggal'    => now()->toDateString(),
+            'waktu'      => now()->format('H:i:s'),
+            'berat'      => $request->berat,
+            'cahaya'     => $request->ir,
+            'status'     => $status,
         ]);
 
-        return response()->json(['ok' => true]);
+        return response()->json([
+            'ok' => true,
+            'message' => 'Data sensor berhasil disimpan',
+            'data' => [
+                'id'         => $sensorLog->id,
+                'id_kandang' => $sensorLog->id_kandang,
+                'berat'      => $sensorLog->berat,
+                'ir'         => $sensorLog->cahaya,
+                'status'     => $sensorLog->status,
+                'tanggal'    => $sensorLog->tanggal,
+                'waktu'      => $sensorLog->waktu,
+            ],
+        ]);
     }
 
     public function latest()
@@ -36,20 +57,21 @@ class SensorController extends Controller
         if (!$last) {
             return response()->json([
                 'success' => false,
-                'message' => 'No data'
+                'message' => 'No data',
             ]);
         }
 
         return response()->json([
             'success' => true,
             'data' => [
-                'id_telur' => $last->id_telur, // ✅ Fix: pakai $last bukan $request
-                'berat'    => $last->berat,
-                'ir'       => $last->cahaya,
-                'status'   => $last->status,
-                'tanggal'  => $last->tanggal,
-                'waktu'    => $last->waktu,
-            ]
+                'id'         => $last->id,
+                'id_kandang' => $last->id_kandang,
+                'berat'      => $last->berat,
+                'ir'         => $last->cahaya,
+                'status'     => $last->status,
+                'tanggal'    => $last->tanggal,
+                'waktu'      => $last->waktu,
+            ],
         ]);
     }
 }

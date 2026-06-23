@@ -114,7 +114,7 @@
                     <div>
                         <h2 class="font-bold text-lg">Monitor Telur Real-Time</h2>
                         <p class="text-xs text-slate-400 mt-1">
-                            Data terbaru dari sensor telur.
+                            Data terbaru dari sensor telur berdasarkan kandang/batch.
                         </p>
                     </div>
 
@@ -128,9 +128,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
 
                     <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
-                        <p class="text-xs text-slate-400">ID Telur</p>
-                        <h3 id="id-telur" class="text-lg font-bold mt-2">
-                            {{ $latestLog->id_telur ?? $latestLog->sensor_id ?? '-' }}
+                        <p class="text-xs text-slate-400">ID Kandang / Batch</p>
+                        <h3 id="id-kandang" class="text-lg font-bold mt-2">
+                            {{ $latestLog->id_kandang ?? '-' }}
                         </h3>
                     </div>
 
@@ -155,7 +155,7 @@
                     <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
                         <p class="text-xs text-slate-400">Cahaya</p>
                         <h3 id="cahaya" class="text-2xl font-bold text-blue-400 mt-2">
-                            {{ $latestLog->cahaya ?? $latestLog->ir ?? '-' }}
+                            {{ $latestLog->cahaya ?? '-' }}
                         </h3>
                         <p class="text-xs text-slate-400 mt-1">nilai sensor</p>
                     </div>
@@ -200,7 +200,8 @@
 
     const maxValue = Math.max(...chartLayak, ...chartTidak, 50);
 
-    let stepSize, suggestedMax;
+    let stepSize;
+    let suggestedMax;
 
     if (maxValue <= 100) {
         stepSize = 10;
@@ -319,10 +320,6 @@
         plugins: [valueLabelPlugin]
     });
 
-    // =====================================================
-    // REALTIME POLLING — fix: endpoint /latest (bukan /api/latest)
-    // =====================================================
-
     function formatTanggal(value) {
         if (!value) return '-';
 
@@ -364,13 +361,11 @@
         };
     }
 
-    // Simpan id_telur terakhir untuk deteksi data baru
-    let lastIdTelur = null;
+    let lastLogId = {{ $latestLog->id ?? 'null' }};
 
     async function fetchLatestSensor() {
         try {
-            // ✅ Fix: /latest bukan /api/latest (sesuai routes/web.php)
-            const response = await fetch('/latest', {
+            const response = await fetch('/api/sensor/latest', {
                 headers: {
                     'Accept': 'application/json'
                 }
@@ -389,9 +384,8 @@
 
             const data = payload.data;
 
-            // Update semua elemen
-            document.getElementById('id-telur').textContent =
-                data.id_telur ?? '-';
+            document.getElementById('id-kandang').textContent =
+                data.id_kandang ?? '-';
 
             document.getElementById('tanggal').textContent =
                 formatTanggal(data.tanggal ?? null);
@@ -410,14 +404,13 @@
             statusEl.textContent = status.text;
             statusEl.className = status.className;
 
-            // Indikator: hijau kalau data baru, kuning kalau sama
-            if (lastIdTelur !== data.id_telur) {
-                lastIdTelur = data.id_telur;
+            if (lastLogId !== data.id) {
+                lastLogId = data.id;
+
                 document.getElementById('realtime-indicator').className =
                     'w-3 h-3 rounded-full bg-green-500 inline-block animate-pulse';
                 document.getElementById('realtime-text').textContent = 'Data baru masuk!';
 
-                // Setelah 2 detik kembali ke status aktif normal
                 setTimeout(() => {
                     document.getElementById('realtime-indicator').className =
                         'w-3 h-3 rounded-full bg-green-500 inline-block';
@@ -431,13 +424,13 @@
 
         } catch (error) {
             console.error('Polling error:', error);
+
             document.getElementById('realtime-indicator').className =
                 'w-3 h-3 rounded-full bg-red-500 inline-block';
             document.getElementById('realtime-text').textContent = 'Gagal mengambil data';
         }
     }
 
-    // Jalankan langsung, lalu polling tiap 3 detik
     fetchLatestSensor();
     setInterval(fetchLatestSensor, 3000);
 </script>

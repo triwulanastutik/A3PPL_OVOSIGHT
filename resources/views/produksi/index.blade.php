@@ -257,7 +257,7 @@
                     </h2>
 
                     <p class="text-xs text-slate-400 mt-1">
-                        Data detail hasil deteksi sensor telur
+                        Data detail hasil deteksi sensor telur berdasarkan kandang atau batch
                     </p>
                 </div>
 
@@ -266,7 +266,7 @@
 
                         <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
                             <tr>
-                                <th class="px-4 py-3">ID Telur</th>
+                                <th class="px-4 py-3">ID Kandang / Batch</th>
                                 <th class="px-4 py-3">Tanggal</th>
                                 <th class="px-4 py-3">Waktu</th>
                                 <th class="px-4 py-3">Berat</th>
@@ -280,7 +280,7 @@
                                 <tr class="border-t border-slate-700 hover:bg-slate-700/40 transition">
 
                                     <td class="px-4 py-3 font-semibold text-white">
-                                        {{ $log->id_telur }}
+                                        {{ $log->id_kandang ?? '-' }}
                                     </td>
 
                                     <td class="px-4 py-3 text-slate-300">
