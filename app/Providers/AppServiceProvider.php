@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        URL::forceRootUrl('https://a3pplovosight-production.up.railway.app');
         URL::forceScheme('https');
-        // URL::forceRootUrl(config('app.url'));
     }
 }
