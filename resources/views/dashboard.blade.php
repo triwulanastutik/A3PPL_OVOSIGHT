@@ -7,7 +7,7 @@
     @vite('resources/css/app.css')
 </head>
 
-<body class="bg-slate-900 text-white">
+<body class="bg-slate-900 text-white overflow-x-hidden">
 
 @php
     $statusRaw = strtolower($latestLog->status ?? '-');
@@ -21,18 +21,29 @@
         : ($statusRaw === 'tidak' ? 'bg-red-600 text-white' : 'bg-slate-600 text-white');
 @endphp
 
+<div id="sidebar-backdrop"
+     class="fixed inset-0 bg-black/60 z-40 hidden md:hidden">
+</div>
+
 <div class="flex min-h-screen">
 
     {{-- SIDEBAR --}}
-    <aside class="w-60 bg-slate-950 text-white flex flex-col shrink-0">
+    <aside id="sidebar"
+           class="fixed md:static inset-y-0 left-0 z-50 w-60 bg-slate-950 text-white flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200">
 
-        <div class="px-5 py-5 border-b border-slate-800">
+        <div class="px-5 py-5 border-b border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold">
                     O
                 </div>
                 <span class="font-bold text-lg tracking-tight">OvoSight</span>
             </div>
+
+            <button id="close-sidebar"
+                    type="button"
+                    class="md:hidden text-slate-400 hover:text-white text-2xl leading-none">
+                ×
+            </button>
         </div>
 
         <div class="px-5 py-3 border-b border-slate-800">
@@ -75,16 +86,22 @@
     </aside>
 
     {{-- MAIN --}}
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col w-full min-w-0">
 
         {{-- TOPBAR --}}
-        <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between shrink-0">
-            <div>
-                <span class="font-semibold text-white">Lubada Farm</span>
+        <header class="bg-slate-950 border-b border-slate-800 px-4 md:px-6 py-3 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <button id="open-sidebar"
+                        type="button"
+                        class="md:hidden bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-sm">
+                    ☰
+                </button>
+
+                <span class="font-semibold text-white truncate">Lubada Farm</span>
             </div>
 
-            <div class="flex items-center gap-2">
-                <div class="text-right">
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="text-right hidden sm:block">
                     <p class="text-sm font-semibold text-white leading-none">
                         {{ auth()->user()->name ?? 'Admin OvoSight' }}
                     </p>
@@ -97,7 +114,7 @@
             </div>
         </header>
 
-        <div class="p-5">
+        <div class="p-4 md:p-5">
 
             {{-- HEADER --}}
             <div class="mb-6">
@@ -108,9 +125,9 @@
             </div>
 
             {{-- REAL-TIME MONITOR --}}
-            <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 mb-6">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 md:p-5 mb-6">
 
-                <div class="flex items-center justify-between mb-5">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
                     <div>
                         <h2 class="font-bold text-lg">Monitor Telur Real-Time</h2>
                         <p class="text-xs text-slate-400 mt-1">
@@ -125,18 +142,18 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
 
-                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 min-w-0">
                         <p class="text-xs text-slate-400">ID Kandang / Batch</p>
-                        <h3 id="id-kandang" class="text-lg font-bold mt-2">
+                        <h3 id="id-kandang" class="text-lg font-bold mt-2 break-words">
                             {{ $latestLog->id_kandang ?? '-' }}
                         </h3>
                     </div>
 
-                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 min-w-0">
                         <p class="text-xs text-slate-400">Tanggal & Waktu</p>
-                        <h3 id="tanggal" class="text-base font-bold mt-2">
+                        <h3 id="tanggal" class="text-base font-bold mt-2 break-words">
                             {{ $latestLog?->tanggal ? \Carbon\Carbon::parse($latestLog->tanggal)->format('d M Y') : '-' }}
                         </h3>
                         <p id="waktu" class="text-xs text-slate-400 mt-1">
@@ -144,7 +161,7 @@
                         </p>
                     </div>
 
-                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 min-w-0">
                         <p class="text-xs text-slate-400">Berat</p>
                         <h3 id="berat" class="text-2xl font-bold text-yellow-400 mt-2">
                             {{ $latestLog->berat ?? '-' }}
@@ -152,7 +169,7 @@
                         <p class="text-xs text-slate-400 mt-1">gram</p>
                     </div>
 
-                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 min-w-0">
                         <p class="text-xs text-slate-400">Cahaya</p>
                         <h3 id="cahaya" class="text-2xl font-bold text-blue-400 mt-2">
                             {{ $latestLog->cahaya ?? '-' }}
@@ -160,7 +177,7 @@
                         <p class="text-xs text-slate-400 mt-1">nilai sensor</p>
                     </div>
 
-                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 min-w-0">
                         <p class="text-xs text-slate-400">Status</p>
                         <span id="status"
                               class="inline-flex mt-2 px-3 py-1.5 rounded-lg text-sm font-bold {{ $statusClass }}">
@@ -173,14 +190,14 @@
             </div>
 
             {{-- GRAFIK MINGGUAN --}}
-            <div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 md:p-5">
 
                 <div class="mb-5">
                     <h2 class="font-bold text-lg">Grafik Klasifikasi Telur Mingguan</h2>
                 </div>
 
-                <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
-                    <canvas id="weeklyChart" height="120"></canvas>
+                <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 h-72 md:h-96">
+                    <canvas id="weeklyChart"></canvas>
                 </div>
 
             </div>
@@ -192,6 +209,27 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const openSidebar = document.getElementById('open-sidebar');
+    const closeSidebar = document.getElementById('close-sidebar');
+
+    function showSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+    }
+
+    function hideSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+    }
+
+    openSidebar?.addEventListener('click', showSidebar);
+    closeSidebar?.addEventListener('click', hideSidebar);
+    backdrop?.addEventListener('click', hideSidebar);
+</script>
 
 <script>
     const chartLabels = @json($chartLabels);
@@ -267,7 +305,7 @@
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             layout: {
                 padding: {
                     top: 28

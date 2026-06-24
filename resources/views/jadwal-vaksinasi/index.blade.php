@@ -7,7 +7,7 @@
     @vite('resources/css/app.css')
 </head>
 
-<body class="bg-slate-900 text-white">
+<body class="bg-slate-900 text-white overflow-x-hidden">
 
 @php
     $jadwalMendatang = $jadwalMendatang ?? collect();
@@ -28,17 +28,27 @@
     $totalSelesai = $jadwalSelesai->count();
 @endphp
 
+<div id="sidebar-overlay"
+     class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
 <div class="flex min-h-screen">
 
     {{-- SIDEBAR --}}
-    <aside class="w-60 bg-slate-950 text-white flex flex-col shrink-0">
-        <div class="px-5 py-5 border-b border-slate-800">
+    <aside id="sidebar"
+           class="fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-60 bg-slate-950 text-white flex flex-col shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <div class="px-5 py-5 border-b border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold">
                     O
                 </div>
                 <span class="font-bold text-lg tracking-tight">OvoSight</span>
             </div>
+
+            <button type="button"
+                    id="close-sidebar"
+                    class="lg:hidden text-slate-400 hover:text-white text-2xl leading-none">
+                &times;
+            </button>
         </div>
 
         <div class="px-5 py-3 border-b border-slate-800">
@@ -46,7 +56,7 @@
             <p class="font-semibold text-sm mt-0.5">Lubada Farm</p>
         </div>
 
-        <nav class="flex-1 px-3 py-4 space-y-0.5">
+        <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
             <a href="{{ route('dashboard') }}"
                class="flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800">
                 Dashboard
@@ -80,16 +90,22 @@
     </aside>
 
     {{-- MAIN --}}
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col min-w-0 w-full">
 
         {{-- TOPBAR --}}
-        <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between shrink-0">
-            <div>
-                <span class="font-semibold text-white">Lubada Farm</span>
+        <header class="bg-slate-950 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <button type="button"
+                        id="open-sidebar"
+                        class="lg:hidden w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white">
+                    ☰
+                </button>
+
+                <span class="font-semibold text-white truncate">Lubada Farm</span>
             </div>
 
-            <div class="flex items-center gap-2">
-                <div class="text-right">
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="text-right hidden sm:block">
                     <p class="text-sm font-semibold text-white leading-none">
                         {{ auth()->user()->name ?? 'Admin OvoSight' }}
                     </p>
@@ -102,11 +118,11 @@
             </div>
         </header>
 
-        <div class="p-5">
+        <div class="p-4 sm:p-5 min-w-0">
 
             {{-- HEADER --}}
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <div>
+                <div class="min-w-0">
                     <h1 class="text-2xl font-bold">Jadwal Vaksinasi</h1>
                     <p class="text-slate-400 text-sm mt-1">
                         Kelola jadwal vaksinasi ayam berdasarkan kandang dan tanggal pelaksanaan.
@@ -114,7 +130,7 @@
                 </div>
 
                 <a href="{{ route('jadwal.vaksinasi.create') }}"
-                   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                   class="w-full md:w-auto text-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
                     + Tambah Jadwal
                 </a>
             </div>
@@ -127,7 +143,7 @@
             @endif
 
             {{-- SUMMARY --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                     <p class="text-xs text-slate-400">Jadwal Belum Dilakukan</p>
                     <h2 class="text-2xl font-bold text-yellow-400 mt-1">
@@ -153,10 +169,10 @@
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
                 {{-- KIRI: KALENDER --}}
-                <div class="xl:col-span-2">
+                <div class="xl:col-span-2 min-w-0">
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
 
-                        <div class="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+                        <div class="px-4 sm:px-5 py-4 border-b border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div>
                                 <h2 class="font-bold">
                                     {{ $currentMonth->translatedFormat('F Y') }}
@@ -169,90 +185,94 @@
                             <div class="flex gap-2">
                                 <a href="{{ route('jadwal.vaksinasi', ['bulan' => $prevMonth->month, 'tahun' => $prevMonth->year]) }}"
                                    class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-sm">
-                                    ‹
+                                    &lsaquo;
                                 </a>
 
                                 <a href="{{ route('jadwal.vaksinasi') }}"
-                                   class="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-sm font-semibold">
+                                   class="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap">
                                     Bulan Ini
                                 </a>
 
                                 <a href="{{ route('jadwal.vaksinasi', ['bulan' => $nextMonth->month, 'tahun' => $nextMonth->year]) }}"
                                    class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-sm">
-                                    ›
+                                    &rsaquo;
                                 </a>
                             </div>
                         </div>
 
-                        {{-- NAMA HARI --}}
-                        <div class="grid grid-cols-7 bg-slate-900 text-slate-400 text-xs uppercase">
-                            @foreach(['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $dayName)
-                                <div class="px-3 py-3 text-center font-semibold">
-                                    {{ $dayName }}
+                        <div class="overflow-x-auto">
+                            <div class="min-w-[720px]">
+                                {{-- NAMA HARI --}}
+                                <div class="grid grid-cols-7 bg-slate-900 text-slate-400 text-xs uppercase">
+                                    @foreach(['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $dayName)
+                                        <div class="px-3 py-3 text-center font-semibold">
+                                            {{ $dayName }}
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        </div>
 
-                        {{-- GRID KALENDER --}}
-                        <div class="grid grid-cols-7 gap-px bg-slate-700">
-                            @for($i = 1; $i < $startDow; $i++)
-                                <div class="min-h-[92px] bg-slate-800"></div>
-                            @endfor
+                                {{-- GRID KALENDER --}}
+                                <div class="grid grid-cols-7 gap-px bg-slate-700">
+                                    @for($i = 1; $i < $startDow; $i++)
+                                        <div class="min-h-[92px] bg-slate-800"></div>
+                                    @endfor
 
-                            @for($day = 1; $day <= $endOfMonth->day; $day++)
-                                @php
-                                    $date = $currentMonth->copy()->day($day);
-                                    $dateKey = $date->format('Y-m-d');
-                                    $jadwalHariIni = $jadwalBulanIni->get($dateKey, collect());
-                                    $isToday = $date->isSameDay($today);
-                                @endphp
+                                    @for($day = 1; $day <= $endOfMonth->day; $day++)
+                                        @php
+                                            $date = $currentMonth->copy()->day($day);
+                                            $dateKey = $date->format('Y-m-d');
+                                            $jadwalHariIni = $jadwalBulanIni->get($dateKey, collect());
+                                            $isToday = $date->isSameDay($today);
+                                        @endphp
 
-                                <a href="{{ route('jadwal.vaksinasi.create', ['tanggal' => $dateKey]) }}"
-                                   class="block min-h-[92px] bg-slate-800 p-2 hover:bg-slate-700/70 transition cursor-pointer">
+                                        <a href="{{ route('jadwal.vaksinasi.create', ['tanggal' => $dateKey]) }}"
+                                           class="block min-h-[92px] bg-slate-800 p-2 hover:bg-slate-700/70 transition cursor-pointer">
 
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="w-7 h-7 flex items-center justify-center rounded-full text-sm font-semibold
-                                            {{ $isToday ? 'bg-green-600 text-white' : 'text-slate-300' }}">
-                                            {{ $day }}
-                                        </span>
-                                    </div>
-
-                                    <div class="space-y-1">
-                                        @foreach($jadwalHariIni->take(2) as $jadwal)
-                                            @php
-                                                $isTerlewat = $jadwal->status === 'belum'
-                                                    && \Carbon\Carbon::parse($jadwal->tanggal)->lt($today);
-                                            @endphp
-
-                                            <div class="text-[11px] px-2 py-1 rounded truncate
-                                                {{ $jadwal->status === 'sudah'
-                                                    ? 'bg-green-600/20 text-green-300'
-                                                    : ($isTerlewat
-                                                        ? 'bg-red-600/20 text-red-300'
-                                                        : 'bg-yellow-500/20 text-yellow-300') }}">
-                                                {{ \Illuminate\Support\Str::limit($jadwal->nama_vaksin, 18) }}
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="w-7 h-7 flex items-center justify-center rounded-full text-sm font-semibold
+                                                    {{ $isToday ? 'bg-green-600 text-white' : 'text-slate-300' }}">
+                                                    {{ $day }}
+                                                </span>
                                             </div>
-                                        @endforeach
 
-                                        @if($jadwalHariIni->count() > 2)
-                                            <p class="text-[11px] text-slate-400">
-                                                +{{ $jadwalHariIni->count() - 2 }} jadwal
-                                            </p>
-                                        @endif
-                                    </div>
+                                            <div class="space-y-1">
+                                                @foreach($jadwalHariIni->take(2) as $jadwal)
+                                                    @php
+                                                        $isTerlewat = $jadwal->status === 'belum'
+                                                            && \Carbon\Carbon::parse($jadwal->tanggal)->lt($today);
+                                                    @endphp
 
-                                </a>
-                            @endfor
+                                                    <div class="text-[11px] px-2 py-1 rounded truncate
+                                                        {{ $jadwal->status === 'sudah'
+                                                            ? 'bg-green-600/20 text-green-300'
+                                                            : ($isTerlewat
+                                                                ? 'bg-red-600/20 text-red-300'
+                                                                : 'bg-yellow-500/20 text-yellow-300') }}">
+                                                        {{ \Illuminate\Support\Str::limit($jadwal->nama_vaksin, 18) }}
+                                                    </div>
+                                                @endforeach
+
+                                                @if($jadwalHariIni->count() > 2)
+                                                    <p class="text-[11px] text-slate-400">
+                                                        +{{ $jadwalHariIni->count() - 2 }} jadwal
+                                                    </p>
+                                                @endif
+                                            </div>
+
+                                        </a>
+                                    @endfor
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {{-- KANAN: DAFTAR JADWAL --}}
-                <div class="space-y-5">
+                <div class="space-y-5 min-w-0">
 
                     {{-- JADWAL MENDATANG --}}
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                        <div class="px-5 py-4 border-b border-slate-700">
+                        <div class="px-4 sm:px-5 py-4 border-b border-slate-700">
                             <h2 class="font-bold">Jadwal Mendatang</h2>
                             <p class="text-xs text-slate-400 mt-1">Status belum dilakukan</p>
                         </div>
@@ -261,10 +281,10 @@
                             @forelse($jadwalMendatang as $jadwal)
                                 <div class="bg-slate-900 border border-slate-700 rounded-lg p-3">
                                     <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <h3 class="font-semibold text-sm">{{ $jadwal->nama_vaksin }}</h3>
+                                        <div class="min-w-0">
+                                            <h3 class="font-semibold text-sm break-words">{{ $jadwal->nama_vaksin }}</h3>
                                             <p class="text-xs text-slate-400 mt-1">
-                                                {{ $jadwal->kandang }} • {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}
+                                                {{ $jadwal->kandang }} &bull; {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}
                                             </p>
 
                                             @if($jadwal->metode_pemberian)
@@ -274,16 +294,16 @@
                                             @endif
                                         </div>
 
-                                        <span class="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full text-[11px] font-semibold">
+                                        <span class="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full text-[11px] font-semibold shrink-0">
                                             Belum
                                         </span>
                                     </div>
 
                                     @if($jadwal->catatan)
-                                        <p class="text-xs text-slate-500 mt-2">{{ $jadwal->catatan }}</p>
+                                        <p class="text-xs text-slate-500 mt-2 break-words">{{ $jadwal->catatan }}</p>
                                     @endif
 
-                                    <div class="flex gap-2 mt-3">
+                                    <div class="flex flex-wrap gap-2 mt-3">
                                         <a href="{{ route('jadwal.vaksinasi.edit', $jadwal->id) }}"
                                            class="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 px-3 py-1.5 rounded-lg text-xs font-semibold">
                                             Edit
@@ -320,7 +340,7 @@
 
                     {{-- JADWAL TERLEWAT --}}
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                        <div class="px-5 py-4 border-b border-slate-700">
+                        <div class="px-4 sm:px-5 py-4 border-b border-slate-700">
                             <h2 class="font-bold">Jadwal Terlewat</h2>
                             <p class="text-xs text-slate-400 mt-1">
                                 Tanggal sudah lewat tetapi belum selesai
@@ -331,10 +351,10 @@
                             @forelse($jadwalTerlewat as $jadwal)
                                 <div class="bg-slate-900 border border-red-500/30 rounded-lg p-3">
                                     <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <h3 class="font-semibold text-sm">{{ $jadwal->nama_vaksin }}</h3>
+                                        <div class="min-w-0">
+                                            <h3 class="font-semibold text-sm break-words">{{ $jadwal->nama_vaksin }}</h3>
                                             <p class="text-xs text-slate-400 mt-1">
-                                                {{ $jadwal->kandang }} • {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}
+                                                {{ $jadwal->kandang }} &bull; {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}
                                             </p>
 
                                             @if($jadwal->metode_pemberian)
@@ -344,16 +364,16 @@
                                             @endif
                                         </div>
 
-                                        <span class="bg-red-500/20 text-red-300 px-2 py-1 rounded-full text-[11px] font-semibold">
+                                        <span class="bg-red-500/20 text-red-300 px-2 py-1 rounded-full text-[11px] font-semibold shrink-0">
                                             Terlewat
                                         </span>
                                     </div>
 
                                     @if($jadwal->catatan)
-                                        <p class="text-xs text-slate-500 mt-2">{{ $jadwal->catatan }}</p>
+                                        <p class="text-xs text-slate-500 mt-2 break-words">{{ $jadwal->catatan }}</p>
                                     @endif
 
-                                    <div class="flex gap-2 mt-3">
+                                    <div class="flex flex-wrap gap-2 mt-3">
                                         <a href="{{ route('jadwal.vaksinasi.edit', $jadwal->id) }}"
                                            class="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 px-3 py-1.5 rounded-lg text-xs font-semibold">
                                             Edit
@@ -390,7 +410,7 @@
 
                     {{-- JADWAL SELESAI --}}
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                        <div class="px-5 py-4 border-b border-slate-700">
+                        <div class="px-4 sm:px-5 py-4 border-b border-slate-700">
                             <h2 class="font-bold">Jadwal Selesai</h2>
                             <p class="text-xs text-slate-400 mt-1">
                                 5 jadwal terakhir yang selesai
@@ -401,14 +421,14 @@
                             @forelse($jadwalSelesai as $jadwal)
                                 <div class="bg-slate-900 border border-slate-700 rounded-lg p-3">
                                     <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <h3 class="font-semibold text-sm">{{ $jadwal->nama_vaksin }}</h3>
+                                        <div class="min-w-0">
+                                            <h3 class="font-semibold text-sm break-words">{{ $jadwal->nama_vaksin }}</h3>
                                             <p class="text-xs text-slate-400 mt-1">
-                                                {{ $jadwal->kandang }} • {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}
+                                                {{ $jadwal->kandang }} &bull; {{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}
                                             </p>
                                         </div>
 
-                                        <span class="bg-green-500/20 text-green-300 px-2 py-1 rounded-full text-[11px] font-semibold">
+                                        <span class="bg-green-500/20 text-green-300 px-2 py-1 rounded-full text-[11px] font-semibold shrink-0">
                                             Sudah
                                         </span>
                                     </div>
@@ -428,6 +448,27 @@
         </div>
     </main>
 </div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+const openSidebar = document.getElementById('open-sidebar');
+const closeSidebar = document.getElementById('close-sidebar');
+
+function showSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+}
+
+function hideSidebar() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+}
+
+openSidebar?.addEventListener('click', showSidebar);
+closeSidebar?.addEventListener('click', hideSidebar);
+overlay?.addEventListener('click', hideSidebar);
+</script>
 
 </body>
 </html>

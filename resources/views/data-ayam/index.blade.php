@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Ayam</title>
     @vite('resources/css/app.css')
 </head>
 
-<body class="bg-slate-900 text-white">
+<body class="bg-slate-900 text-white overflow-x-hidden">
 
 @php
     $items = $batches instanceof \Illuminate\Pagination\AbstractPaginator
@@ -18,18 +20,28 @@
     $totalAfkir = $items->where('status_produksi', 'Afkir')->count();
 @endphp
 
+<div id="sidebar-overlay"
+     class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
 <div class="flex min-h-screen">
 
     {{-- SIDEBAR --}}
-    <aside class="w-60 bg-slate-950 text-white flex flex-col shrink-0">
+    <aside id="sidebar"
+           class="fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-60 bg-slate-950 text-white flex flex-col shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
 
-        <div class="px-5 py-5 border-b border-slate-800">
+        <div class="px-5 py-5 border-b border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold">
                     O
                 </div>
                 <span class="font-bold text-lg tracking-tight">OvoSight</span>
             </div>
+
+            <button type="button"
+                    id="close-sidebar"
+                    class="lg:hidden text-slate-400 hover:text-white text-2xl leading-none">
+                &times;
+            </button>
         </div>
 
         <div class="px-5 py-3 border-b border-slate-800">
@@ -37,7 +49,7 @@
             <p class="font-semibold text-sm mt-0.5">Lubada Farm</p>
         </div>
 
-        <nav class="flex-1 px-3 py-4 space-y-0.5">
+        <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
             <a href="{{ route('dashboard') }}"
                class="flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800">
                 Dashboard
@@ -72,16 +84,22 @@
     </aside>
 
     {{-- MAIN --}}
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col min-w-0 w-full">
 
         {{-- TOPBAR --}}
-        <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between shrink-0">
-            <div>
-                <span class="font-semibold text-white">Lubada Farm</span>
+        <header class="bg-slate-950 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <button type="button"
+                        id="open-sidebar"
+                        class="lg:hidden w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white">
+                    ☰
+                </button>
+
+                <span class="font-semibold text-white truncate">Lubada Farm</span>
             </div>
 
-            <div class="flex items-center gap-2">
-                <div class="text-right">
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="text-right hidden sm:block">
                     <p class="text-sm font-semibold text-white leading-none">
                         {{ auth()->user()->name ?? 'Admin OvoSight' }}
                     </p>
@@ -94,11 +112,11 @@
             </div>
         </header>
 
-        <div class="p-5">
+        <div class="p-4 sm:p-5 min-w-0">
 
             {{-- HEADER --}}
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <div>
+                <div class="min-w-0">
                     <h1 class="text-2xl font-bold">Data Ayam</h1>
                     <p class="text-slate-400 text-sm mt-1">
                         Pantau populasi, umur, dan status produksi per kandang.
@@ -106,7 +124,7 @@
                 </div>
 
                 <a href="{{ route('data.ayam.create') }}"
-                   class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white text-sm font-semibold">
+                   class="w-full md:w-auto text-center bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white text-sm font-semibold">
                     + Tambah Data Ayam
                 </a>
             </div>
@@ -119,7 +137,7 @@
             @endif
 
             {{-- SUMMARY --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                     <p class="text-xs text-slate-400">Total Kandang</p>
                     <h2 class="text-2xl font-bold mt-1">{{ number_format($totalKandang) }}</h2>
@@ -137,18 +155,9 @@
             </div>
 
             {{-- FILTER --}}
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-6">
+            <div class="bg-slate-800 p-4 sm:p-5 rounded-xl border border-slate-700 mb-6">
                 <form method="GET" action="{{ route('data.ayam') }}"
-                      class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-
-                    {{-- <div class="md:col-span-2">
-                        <label class="block text-xs text-slate-400 mb-1">Pencarian</label>
-                        <input type="text"
-                               name="search"
-                               value="{{ request('search') }}"
-                               placeholder="Cari ID kandang atau status..."
-                               class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500">
-                    </div> --}}
+                      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">Status</label>
@@ -160,14 +169,14 @@
                         </select>
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="flex flex-col sm:flex-row gap-2 sm:col-span-1">
                         <button type="submit"
-                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold w-full">
+                                class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
                             Filter
                         </button>
 
                         <a href="{{ route('data.ayam') }}"
-                           class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                           class="w-full text-center bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">
                             Reset
                         </a>
                     </div>
@@ -177,7 +186,7 @@
             {{-- TABLE --}}
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
 
-                <div class="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+                <div class="px-4 sm:px-5 py-4 border-b border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h2 class="font-bold">Daftar Data Ayam</h2>
                         <p class="text-xs text-slate-400 mt-1">
@@ -185,14 +194,14 @@
                         </p>
                     </div>
 
-                    <p class="text-xs text-slate-400">
+                    <p class="text-xs text-slate-400 shrink-0">
                         Total tampil:
                         <span class="text-white font-semibold">{{ number_format($totalKandang) }}</span>
                     </p>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                    <table class="w-full min-w-[760px] text-left text-sm">
 
                         <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
                             <tr>
@@ -227,11 +236,11 @@
 
                                     <td class="px-4 py-3">
                                         @if($batch->status_produksi === 'Produktif')
-                                            <span class="bg-green-600 px-3 py-1 rounded-full text-xs font-semibold text-white">
+                                            <span class="bg-green-600 px-3 py-1 rounded-full text-xs font-semibold text-white whitespace-nowrap">
                                                 Produktif
                                             </span>
                                         @else
-                                            <span class="bg-red-600 px-3 py-1 rounded-full text-xs font-semibold text-white">
+                                            <span class="bg-red-600 px-3 py-1 rounded-full text-xs font-semibold text-white whitespace-nowrap">
                                                 Afkir
                                             </span>
                                         @endif
@@ -272,7 +281,7 @@
                 </div>
 
                 @if(method_exists($batches, 'links'))
-                    <div class="px-5 py-4 border-t border-slate-700">
+                    <div class="px-4 sm:px-5 py-4 border-t border-slate-700 overflow-x-auto">
                         {{ $batches->links() }}
                     </div>
                 @endif
@@ -282,6 +291,27 @@
         </div>
     </main>
 </div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+const openSidebar = document.getElementById('open-sidebar');
+const closeSidebar = document.getElementById('close-sidebar');
+
+function showSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+}
+
+function hideSidebar() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+}
+
+openSidebar?.addEventListener('click', showSidebar);
+closeSidebar?.addEventListener('click', hideSidebar);
+overlay?.addEventListener('click', hideSidebar);
+</script>
 
 </body>
 </html>

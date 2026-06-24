@@ -7,20 +7,30 @@
     @vite('resources/css/app.css')
 </head>
 
-<body class="bg-slate-900 text-white">
+<body class="bg-slate-900 text-white overflow-x-hidden">
+
+<div id="sidebar-overlay"
+     class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
 
 <div class="flex min-h-screen">
 
     {{-- SIDEBAR --}}
-    <aside class="w-60 bg-slate-950 text-white flex flex-col shrink-0">
+    <aside id="sidebar"
+           class="fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-60 bg-slate-950 text-white flex flex-col shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
 
-        <div class="px-5 py-5 border-b border-slate-800">
+        <div class="px-5 py-5 border-b border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold">
                     O
                 </div>
                 <span class="font-bold text-lg tracking-tight">OvoSight</span>
             </div>
+
+            <button type="button"
+                    id="close-sidebar"
+                    class="lg:hidden text-slate-400 hover:text-white text-2xl leading-none">
+                &times;
+            </button>
         </div>
 
         <div class="px-5 py-3 border-b border-slate-800">
@@ -28,7 +38,7 @@
             <p class="font-semibold text-sm mt-0.5">Lubada Farm</p>
         </div>
 
-        <nav class="flex-1 px-3 py-4 space-y-0.5">
+        <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
             <a href="{{ route('dashboard') }}"
                class="flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800">
                 Dashboard
@@ -63,16 +73,22 @@
     </aside>
 
     {{-- MAIN --}}
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col min-w-0 w-full">
 
         {{-- TOPBAR --}}
-        <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between shrink-0">
-            <div>
-                <span class="font-semibold text-white">Lubada Farm</span>
+        <header class="bg-slate-950 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <button type="button"
+                        id="open-sidebar"
+                        class="lg:hidden w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white">
+                    ☰
+                </button>
+
+                <span class="font-semibold text-white truncate">Lubada Farm</span>
             </div>
 
-            <div class="flex items-center gap-2">
-                <div class="text-right">
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="text-right hidden sm:block">
                     <p class="text-sm font-semibold text-white leading-none">
                         {{ auth()->user()->name ?? 'Admin OvoSight' }}
                     </p>
@@ -85,7 +101,7 @@
             </div>
         </header>
 
-        <div class="p-5">
+        <div class="p-4 sm:p-5 min-w-0">
 
             {{-- HEADER --}}
             <div class="mb-6">
@@ -113,7 +129,7 @@
             @endphp
 
             {{-- INFO STATUS SAAT INI --}}
-            <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 mb-5 max-w-3xl">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 mb-5 w-full max-w-3xl">
                 <p class="text-xs text-slate-400 mb-2">Status saat ini</p>
 
                 @if($jadwal->status === 'sudah')
@@ -135,9 +151,9 @@
             </div>
 
             {{-- FORM CARD --}}
-            <div class="bg-slate-800 rounded-xl border border-slate-700 max-w-3xl overflow-hidden">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-3xl overflow-hidden">
 
-                <div class="px-5 py-4 border-b border-slate-700">
+                <div class="px-4 sm:px-5 py-4 border-b border-slate-700">
                     <h2 class="font-bold">Form Edit Jadwal</h2>
                     <p class="text-xs text-slate-400 mt-1">
                         Status hanya bisa dipilih belum atau sudah. Terlewat dihitung otomatis dari tanggal.
@@ -146,7 +162,7 @@
 
                 <form action="{{ route('jadwal.vaksinasi.update', $jadwal->id) }}"
                       method="POST"
-                      class="p-5 space-y-5">
+                      class="p-4 sm:p-5 space-y-5">
 
                     @csrf
                     @method('PUT')
@@ -271,9 +287,9 @@
                     </div>
 
                     {{-- ACTION --}}
-                    <div class="flex gap-3 pt-2">
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
                         <button type="submit"
-                                class="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-semibold">
+                                class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-semibold">
                             Update Jadwal
                         </button>
 
@@ -281,7 +297,7 @@
                                 'bulan' => \Carbon\Carbon::parse($jadwal->tanggal)->month,
                                 'tahun' => \Carbon\Carbon::parse($jadwal->tanggal)->year
                             ]) }}"
-                           class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white text-sm font-semibold">
+                           class="w-full sm:w-auto text-center bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white text-sm font-semibold">
                             Kembali
                         </a>
                     </div>
@@ -294,6 +310,27 @@
     </main>
 
 </div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+const openSidebar = document.getElementById('open-sidebar');
+const closeSidebar = document.getElementById('close-sidebar');
+
+function showSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+}
+
+function hideSidebar() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+}
+
+openSidebar?.addEventListener('click', showSidebar);
+closeSidebar?.addEventListener('click', hideSidebar);
+overlay?.addEventListener('click', hideSidebar);
+</script>
 
 </body>
 </html>
